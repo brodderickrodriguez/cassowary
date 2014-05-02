@@ -26,9 +26,10 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+===========================================================================
 
-This port of Cassowary was derived from the JavaScript implmentation of the
-Cassowary algorithm. That implementation is distributed under the terms of the
+This port of the Cassowary algorithm was derived from the JavaScript
+implmentation. That implementation is distributed under the terms of the
 Apache 2.0 license:
 
 Copyright (C) 1998-2000 Greg J. Badros
