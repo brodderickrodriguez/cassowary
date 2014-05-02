@@ -1,0 +1,64 @@
+from unittest import TestCase
+
+from cassowary.variable import Variable
+from cassowary.constraint import StayConstraint, Equation
+from cassowary.simplex_solver import SimplexSolver
+from cassowary.strength import STRONG, REQUIRED
+
+
+class SimplexSolverTestCase(TestCase):
+    def test_constructor(self):
+        "A solver can be constructed"
+        solver = SimplexSolver()
+
+        self.assertEqual(len(solver.columns), 0)
+        self.assertEqual(len(solver.rows), 1)
+        self.assertEqual(len(solver.infeasible_rows), 0)
+        self.assertEqual(len(solver.external_rows), 0)
+        self.assertEqual(len(solver.external_parametric_vars), 0)
+
+    def test_add_edit_var_required(self):
+        "Solver works with REQUIRED strength"
+        solver = SimplexSolver()
+
+        a = Variable(name='a')
+
+        solver.add_constraint(StayConstraint(a, STRONG, 0))
+        solver.resolve()
+
+        self.assertEqual(a.value, 0)
+
+        solver.add_edit_var(a, REQUIRED)
+        solver.begin_edit()
+        solver.suggest_value(a, 2)
+        solver.resolve()
+
+        self.assertEqual(a.value, 2)
+
+    def test_add_edit_var_required_after_suggestions(self):
+        "Solver works with REQUIRED strength after many suggestions"
+        solver = SimplexSolver()
+        a = Variable(name='a')
+        b = Variable(name='b')
+
+        solver.add_constraint(StayConstraint(a, STRONG, 0))
+        solver.add_constraint(Equation(a, b, REQUIRED))
+        solver.resolve()
+
+        self.assertEqual(b.value, 0)
+        self.assertEqual(a.value, 0)
+
+        solver.add_edit_var(a, REQUIRED)
+        solver.begin_edit()
+        solver.suggest_value(a, 2)
+        solver.resolve()
+
+        self.assertEqual(a.value, 2)
+        self.assertEqual(b.value, 2)
+
+        solver.suggest_value(a, 10)
+        solver.resolve()
+
+        self.assertEqual(a.value, 10)
+        self.assertEqual(b.value, 10)
+

@@ -59,13 +59,13 @@ class SimplexSolver(Tableau):
         if cn.is_inequality:
             # print "Inequality, adding slack"
             self.slack_counter = self.slack_counter + 1
-            slack_var = SlackVariable(number=self.slack_counter, prefix='s')
+            slack_var = SlackVariable(prefix='s', number=self.slack_counter)
             expr.set_variable(slack_var, -1)
 
             self.marker_vars[cn] = slack_var
             if not cn.is_required:
                 self.slack_counter = self.slack_counter + 1
-                eminus = SlackVariable(number=self.slack_counter, prefix='em')
+                eminus = SlackVariable(prefix='em', number=self.slack_counter)
                 expr.set_variable(eminus, 1)
                 z_row = self.rows[self.objective]
                 z_row.set_variable(eminus, cn.strength * cn.weight)
@@ -75,7 +75,7 @@ class SimplexSolver(Tableau):
             if cn.is_required:
                 # print "Equality, required"
                 self.dummy_counter = self.dummy_counter + 1
-                dummy_var = DummyVariable(number=self.dummy_counter, prefix='d')
+                dummy_var = DummyVariable(number=self.dummy_counter)
                 eplus = dummy_var
                 eminus = dummy_var
                 prev_edit_constant = cn.expression.constant
@@ -85,8 +85,8 @@ class SimplexSolver(Tableau):
             else:
                 # print "Equality, not required"
                 self.slack_counter = self.slack_counter + 1
-                eplus = SlackVariable(number=self.slack_counter, prefix='ep')
-                eminus = SlackVariable(number=self.slack_counter, prefix='em')
+                eplus = SlackVariable(prefix='ep', number=self.slack_counter)
+                eminus = SlackVariable(prefix='em', number=self.slack_counter)
                 expr.set_variable(eplus, -1)
                 expr.set_variable(eminus, 1)
                 self.marker_vars[cn] = eplus
@@ -95,8 +95,8 @@ class SimplexSolver(Tableau):
                 # print "z_row", z_row
                 sw_coeff = cn.strength * cn.weight
                 # if sw_coeff == 0:
-                    # print "cn ==", cn
-                    # print "adding ", eplus, "and", eminus, "with sw_coeff", sw_coeff
+                #     print "cn ==", cn
+                #     print "adding ", eplus, "and", eminus, "with sw_coeff", sw_coeff
                 z_row.set_variable(eplus, sw_coeff)
                 self.note_added_variable(eplus, self.objective)
                 z_row.set_variable(eminus, sw_coeff)
@@ -174,15 +174,6 @@ class SimplexSolver(Tableau):
 
         except ConstraintNotFound:
             raise InternalError('Constraint not found during internal removal')
-
-    def add_point_stays(self, points):
-        # print "add_point_stays", points
-        weight = 1.0
-        multiplier = 2.0
-        for i, point in enumerate(points):
-            self.add_stay(point.x, WEAK, weight)
-            self.add_stay(point.y, WEAK, weight)
-            weight = weight * multiplier
 
     def add_stay(self, v, strength=WEAK, weight=1.0):
         self.add_constraint(StayConstraint(v, strength, weight))
@@ -358,7 +349,7 @@ class SimplexSolver(Tableau):
     def add_with_artificial_variable(self, expr):
         # print "add_with_artificial_variable", expr
         self.artificial_counter = self.artificial_counter + 1
-        av = SlackVariable(number=self.artificial_counter, prefix='a')
+        av = SlackVariable(prefix='a', number=self.artificial_counter)
         az = ObjectiveVariable('az')
         az_row = expr.clone()
         # print 'Before add_rows'
@@ -371,19 +362,23 @@ class SimplexSolver(Tableau):
         az_tableau_row = self.rows[az]
         # print "azTableauRow.constant =", az_tableau_row.constant
         if not approx_equal(az_tableau_row.constant, 0.0):
+            # print "azTableauRow.constant is 0"
             self.remove_row(az)
             self.remove_column(av)
             raise RequiredFailure()
 
         e = self.rows.get(av)
         if e != None:
+            # print "av exists"
             if e.is_constant:
+                # print "av is constant"
                 self.remove_row(av)
                 self.remove_row(az)
                 return
             entry_var = e.any_pivotable_variable()
             self.pivot(entry_var, av)
 
+        # print "av shouldn't exist now"
         assert av not in self.rows
         self.remove_column(av)
         self.remove_row(az)
@@ -484,7 +479,7 @@ class SimplexSolver(Tableau):
     def dual_optimize(self):
         z_row = self.rows.get(self.objective)
         while self.infeasible_rows:
-            exit_var = self.infeasible_rows.pop(0)
+            exit_var = self.infeasible_rows.pop()
             entry_var = None
             expr = self.rows.get(exit_var)
             if expr:
@@ -518,11 +513,13 @@ class SimplexSolver(Tableau):
         while True:
             objective_coeff = 0.0
 
-            for v, c in z_row.terms.items():
-                # print v, v.is_pivotable, c
+            for v, c in sorted(z_row.terms.items()):
+                # print 'term check', v, v.is_pivotable, c
                 if v.is_pivotable and c < objective_coeff:
+                    # print 'candidate found'
                     objective_coeff = c
                     entry_var = v
+                    break;
 
             if objective_coeff >= -EPSILON or entry_var is None:
                 return

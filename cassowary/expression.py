@@ -12,15 +12,18 @@ class Expression(object):
         self.terms = {}
 
         if variable:
-            self.set_variable(variable, value)
+            self.set_variable(variable, float(value))
 
     def __repr__(self):
         parts = []
         if not approx_equal(self.constant, 0.0) or self.is_constant:
             parts.append(repr(self.constant))
-        for clv, coeff in self.terms.items():
-            parts.append(repr(coeff) + "*" + repr(clv))
-        return 'Expr: ' + ' + '.join(parts)
+        for clv, coeff in sorted(self.terms.items(), key=lambda x:repr(x)):
+            if approx_equal(coeff, 1.0):
+                parts.append(repr(clv))
+            else:
+                parts.append(repr(coeff) + "*" + repr(clv))
+        return ' + '.join(parts)
 
     @property
     def is_constant(self):
@@ -32,18 +35,43 @@ class Expression(object):
             expr.set_variable(clv, value)
         return expr
 
+    def __eq__(self, x):
+        if not isinstance(x, Expression):
+            return False
+
+        if not approx_equal(self.constant, x.constant):
+            return False
+
+        if len(self.terms) != len(x.terms):
+            return False
+
+        if any(x.terms.get(var) != value for var, value in self.terms.items()):
+            return False
+
+        return True
+
+    def __rmul__(self, x):
+        return self.__mul__(x)
+
     def __mul__(self, x):
-        if isinstance(x, (float, int)):
-            result = Expression(constant=self.constant * x)
-            for clv, value in self.terms.items():
-                result.set_variable(clv, value * x)
-        else:
+        if isinstance(x, Expression):
             if self.is_constant:
                 result = x * self.constant
             elif x.is_constant:
                 result = self * x.constant
             else:
                 raise TypeError('Cannot multiply expression by non-constant')
+        elif isinstance(x, Variable):
+            if self.is_constant:
+                result = Expression(x, self.constant)
+            else:
+                raise TypeError('Cannot multiply a variable by a non-constant expression')
+        elif isinstance(x, (float, int)):
+            result = Expression(constant=self.constant * x)
+            for clv, value in self.terms.items():
+                result.set_variable(clv, value * x)
+        else:
+            raise TypeError('Cannot multiply expression by object of type %s' % type(x))
         return result
 
     def __div__(self, x):
@@ -60,27 +88,61 @@ class Expression(object):
                 raise TypeError('Cannot divide expression by non-constant')
         return result
 
+    def __radd__(self, x):
+        return self.__add__(x)
+
     def __add__(self, x):
         if isinstance(x, Expression):
-            return self.clone().add_expression(x, 1.0)
+            result = self.clone()
+            result.add_expression(x, 1.0)
+            return result
         elif isinstance(x, Variable):
-            return self.clone().add_variable(x, 1.0)
+            result = self.clone()
+            result.add_variable(x, 1.0)
+            return result
         elif isinstance(x, (int, float)):
-            return self.clone().add_expression(Expression(constant=x), 1.0)
+            result = self.clone()
+            result.add_expression(Expression(constant=x), 1.0)
+            return result
         else:
             raise TypeError('Cannot add object of type %s to expression' % type(x))
 
-    def __sub__(self, x):
+    def __rsub__(self, x):
         if isinstance(x, Expression):
-            return self.clone().add_expression(x, -1.0)
+            result = self.clone()
+            result.multiply(-1.0)
+            result.add_expression(x, 1.0)
+            return result
         elif isinstance(x, Variable):
-            return self.clone().add_variable(x, -1.0)
+            result = self.clone()
+            result.multiply(-1.0)
+            result.add_variable(x, 1.0)
+            return result
         elif isinstance(x, (int, float)):
-            return self.clone().add_expression(Expression(constant=x), -1.0)
+            result = self.clone()
+            result.multiply(-1.0)
+            result.add_expression(Expression(constant=x), 1.0)
+            return result
         else:
             raise TypeError('Cannot subtract object of type %s from expression' % type(x))
 
-    def add_expression(self, expr, n, subject=None, solver=None):
+    def __sub__(self, x):
+        if isinstance(x, Expression):
+            result = self.clone()
+            result.add_expression(x, -1.0)
+            return result
+        elif isinstance(x, Variable):
+            result = self.clone()
+            result.add_variable(x, -1.0)
+            return result
+        elif isinstance(x, (int, float)):
+            result = self.clone()
+            result.add_expression(Expression(constant=x), -1.0)
+            return result
+        else:
+            raise TypeError('Cannot subtract object of type %s from expression' % type(x))
+
+    def add_expression(self, expr, n=1.0, subject=None, solver=None):
         if isinstance(expr, AbstractVariable):
             expr = Expression(variable=expr)
 
@@ -88,9 +150,7 @@ class Expression(object):
         for clv, coeff in expr.terms.items():
             self.add_variable(clv, coeff * n, subject, solver)
 
-        return self
-
-    def add_variable(self, v, cd, subject=None, solver=None):
+    def add_variable(self, v, cd=1.0, subject=None, solver=None):
         # print 'expression: add_variable', v, cd
         coeff = self.terms.get(v)
         if coeff:
@@ -106,7 +166,6 @@ class Expression(object):
                 self.set_variable(v, cd)
                 if solver:
                     solver.note_added_variable(v, subject)
-        return self
 
     def set_variable(self, v, c):
         self.terms[v] = float(c)
@@ -126,7 +185,7 @@ class Expression(object):
 
         return retval
 
-    def substitute_out(self, outvar, expr, subject, solver):
+    def substitute_out(self, outvar, expr, subject=None, solver=None):
         multiplier = self.terms.pop(outvar)
         self.constant = self.constant + multiplier  * expr.constant
 
@@ -148,7 +207,7 @@ class Expression(object):
         self.set_variable(old_subject, self.new_subject(new_subject))
 
     def multiply(self, x):
-        self.constant = self.constant * x
+        self.constant = self.constant * float(x)
         for clv, value in self.terms.items():
             self.set_variable(clv, value * x)
 
@@ -161,4 +220,3 @@ class Expression(object):
 
     def coefficient_for(self, clv):
         return self.terms.get(clv, 0.0)
-

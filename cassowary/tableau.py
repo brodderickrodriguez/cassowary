@@ -49,7 +49,7 @@ class Tableau(object):
         # print self
 
     def remove_column(self, var):
-        rows = self.columns.pop(var)
+        rows = self.columns.pop(var, None)
 
         if rows:
             for clv in rows:
