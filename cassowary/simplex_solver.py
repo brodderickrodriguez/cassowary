@@ -7,6 +7,17 @@ from .tableau import Tableau
 from .utils import approx_equal, EPSILON, STRONG, WEAK
 
 
+class SolverEditContext(object):
+    def __init__(self, solver):
+        self.solver = solver
+
+    def __enter__(self):
+        self.solver.begin_edit()
+
+    def __exit__(self, type, value, tb):
+        self.solver.end_edit()
+
+
 class SimplexSolver(Tableau):
     def __init__(self):
         super(SimplexSolver, self).__init__()
@@ -71,17 +82,14 @@ class SimplexSolver(Tableau):
     def remove_edit_var(self, v):
         self.remove_constraint(self.edit_var_map[v].constraint)
 
-    def begin_edit(self):
-        assert len(self.edit_var_map) > 0
+    def edit(self):
+        return SolverEditContext(self)
+
+    def resolve(self):
+        self.dual_optimize()
+        self.set_external_variables()
         self.infeasible_rows.clear()
         self.reset_stay_constants()
-        self.edit_variable_stack.append(len(self.edit_var_map))
-
-    def end_edit(self):
-        assert len(self.edit_var_map) > 0
-        self.resolve()
-        self.edit_variable_stack.pop()
-        self.remove_edit_vars_to(self.edit_variable_stack[-1])
 
     #######################################################################
     # Internals
@@ -160,6 +168,18 @@ class SimplexSolver(Tableau):
         if expr.constant < 0:
             expr.multiply(-1.0)
         return expr, eplus, eminus, prev_edit_constant
+
+    def begin_edit(self):
+        assert len(self.edit_var_map) > 0
+        self.infeasible_rows.clear()
+        self.reset_stay_constants()
+        self.edit_variable_stack.append(len(self.edit_var_map))
+
+    def end_edit(self):
+        assert len(self.edit_var_map) > 0
+        self.resolve()
+        self.edit_variable_stack.pop()
+        self.remove_edit_vars_to(self.edit_variable_stack[-1])
 
     def remove_all_edit_vars(self):
         self.remove_edit_vars_to(0)
@@ -309,21 +329,10 @@ class SimplexSolver(Tableau):
 
         self.resolve()
 
-    def resolve_pair(self, x, y):
-        self.suggest_value(self.edit_var_list[0], x)
-        self.suggest_value(self.edit_var_list[1], y)
-        self.resolve()
-
-    def resolve(self):
-        self.dual_optimize()
-        self.set_external_variables()
-        self.infeasible_rows.clear()
-        self.reset_stay_constants()
-
     def suggest_value(self, v, x):
         cei = self.edit_var_map.get(v)
         if not cei:
-            raise InternalError("suggestValue for variable " + v + ", but var is not an edit variable")
+            raise InternalError("suggestValue for variable %s, but var is not an edit variable" % v)
         # print(cei)
         delta = x - cei.prev_edit_constant
         cei.prev_edit_constant = x

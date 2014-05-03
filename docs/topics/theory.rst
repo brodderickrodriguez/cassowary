@@ -32,10 +32,10 @@ Variables
 
 At the core of the constraint problem are the variables in the system.
 In the formal mathematical system, these are the ``x[n]`` terms; in Python,
-these are rendered as instances of the :class:`Variable` class.
+these are rendered as instances of the :class:`~cassowary.Variable` class.
 
 Each variable is named, and can accept a default value. To create a variable,
-instantiate an instance of :class:`Variable`::
+instantiate an instance of :class:`~cassowary.Variable`::
 
     from cassowary import Variable
 
@@ -75,8 +75,8 @@ raw mathematical expression::
 In this example, `constraint` holds the defintion for the constraint system.
 Although the statement uses the Python comparison operator `<=`, the result is
 *not* a boolean. The comparison operators `<=`, `<`, `>=`, `>`, and `==` have
-been overridden for instances of :class:`Variable` to enable you to easily
-define constraints.
+been overridden for instances of :class:`~cassowary.Variable` to enable you to
+easily define constraints.
 
 Solvers
 -------
@@ -84,8 +84,9 @@ Solvers
 The solver is the engine that resolves the linear constraints into a solution.
 There are many approaches to this problem, and the development of algorithmic
 approaches has been the subject of math and computer science research for over
-70 years. Cassowary provides one implementation -- a :class:`SimplexSolver`,
-implementing the Simplex algorithm defined by Dantzig in the 1940s.
+70 years. Cassowary provides one implementation -- a
+:class:`~cassowary.SimplexSolver`, implementing the Simplex algorithm defined
+by Dantzig in the 1940s.
 
 The solver takes no arguments during constructions; once constructed, you simply
 add constraints to the system.
@@ -185,8 +186,9 @@ Unless otherwise specified, all constraints are ``REQUIRED``.
 Constraint weight
 -----------------
 
-If you have multiple constraints of the same strength, you may want to have a tie-breaker between them.
-To do this, you can set a **weight**, in addition to a strength::
+If you have multiple constraints of the same strength, you may want to have a
+tie-breaker between them. To do this, you can set a **weight**, in addition to
+a strength::
 
     from cassowary import SimplexSolver, Variable, STRONG
 
@@ -216,3 +218,35 @@ when you add the constraint::
 
 Once a constraint is removed, the system will be automatically re-evaluated,
 with the possible side effect that the values in the system will change.
+
+But what if you want to change a variable's value without introducing a
+new constraint? In this case, you can use an edit context.
+
+Here's an example of an edit context in practice::
+
+    from cassowary import SimplexSolver, Variable
+
+    solver = SimplexSolver()
+    x = Variable('x')
+
+    # Add a stay to x - that is, don't change the value.
+    solver.add_stay(x)
+
+    # Now, mark x as being editable...
+    solver.add_edit_variable(x)
+
+    # ... start and edit context...
+    with solver.edit():
+        # ... and suggest a new value for the variable.
+
+        solver.suggest_value(x, 42.0)
+
+When the edit context exits, the system will re-evaluate itself, and the
+variable will have the new value. However, the variable isn't guaranteed
+to have the value you suggested - in this case it will, but if your
+constraint system has other constraints, they may affect the value of
+the variable after the suggestion has been applied.
+
+All variables in the system will be re-evaluated when you leave the edit
+context; however, if you need to force a re-evaluation in the middle of an
+edit context, you can do so by calling :meth:`~cassowary.Solver.resolve()`.

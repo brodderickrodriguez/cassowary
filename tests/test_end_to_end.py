@@ -373,42 +373,47 @@ class EndToEndTestCase(TestCase):
         w = Variable('w')
         h = Variable('h')
         solver = SimplexSolver()
-        # Add some stays and start an editing session
+
+        # Add some stays
         solver.add_stay(x)
         solver.add_stay(y)
         solver.add_stay(w)
         solver.add_stay(h)
+
+        # start an editing session
         solver.add_edit_var(x)
         solver.add_edit_var(y)
-        solver.begin_edit()
 
-        solver.suggest_value(x, 10)
-        solver.suggest_value(y, 20)
-        solver.resolve()
+        with solver.edit():
+            solver.suggest_value(x, 10)
+            solver.suggest_value(y, 20)
 
-        self.assertAlmostEqual(x.value, 10)
-        self.assertAlmostEqual(y.value, 20)
-        self.assertAlmostEqual(w.value, 0)
-        self.assertAlmostEqual(h.value, 0)
+            # Force the system to resolve.
+            solver.resolve()
 
-        # Open a second set of variables for editing
-        solver.add_edit_var(w)
-        solver.add_edit_var(h)
-        solver.begin_edit()
-        solver.suggest_value(w, 30)
-        solver.suggest_value(h, 40)
-        solver.end_edit()
+            self.assertAlmostEqual(x.value, 10)
+            self.assertAlmostEqual(y.value, 20)
+            self.assertAlmostEqual(w.value, 0)
+            self.assertAlmostEqual(h.value, 0)
 
-        # Close the second set...
-        self.assertAlmostEqual(x.value, 10)
-        self.assertAlmostEqual(y.value, 20)
-        self.assertAlmostEqual(w.value, 30)
-        self.assertAlmostEqual(h.value, 40)
+            # Open a second set of variables for editing
+            solver.add_edit_var(w)
+            solver.add_edit_var(h)
 
-        # Now make sure the first set can still be edited
-        solver.suggest_value(x, 50)
-        solver.suggest_value(y, 60)
-        solver.end_edit()
+            with solver.edit():
+                solver.suggest_value(w, 30)
+                solver.suggest_value(h, 40)
+
+            # Close the second set...
+            self.assertAlmostEqual(x.value, 10)
+            self.assertAlmostEqual(y.value, 20)
+            self.assertAlmostEqual(w.value, 30)
+            self.assertAlmostEqual(h.value, 40)
+
+            # Now make sure the first set can still be edited
+            solver.suggest_value(x, 50)
+            solver.suggest_value(y, 60)
+
         self.assertAlmostEqual(x.value, 50)
         self.assertAlmostEqual(y.value, 60)
         self.assertAlmostEqual(w.value, 30)
@@ -502,11 +507,10 @@ class EndToEndTestCase(TestCase):
             solver.add_edit_var(iw)
             solver.add_edit_var(ih)
 
-            solver.begin_edit()
-            solver.suggest_value(iw, iwv)
-            solver.suggest_value(ih, ihv)
-            solver.resolve()
-            solver.end_edit()
+            with solver.edit():
+                solver.suggest_value(iw, iwv)
+                solver.suggest_value(ih, ihv)
+                # solver.resolve()
 
             self.assertAlmostEqual(top.value, 0)
             self.assertAlmostEqual(left.value, 0)

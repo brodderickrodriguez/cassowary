@@ -75,9 +75,9 @@ Now we can set up the constraints to define where the midpoints fall. By
 definition, each midpoint **must** fall exactly halfway between two points
 that form a line, and that's exactly what we describe - an expression that
 computes the position of the midpoint. This expression is used to construct a
-:class:`Constraint`, describing that the value of the midpoint must equal the
-value of the expression. The :class:`Constraint` is then added to the solver
-system::
+:class:`~cassowary.Constraint`, describing that the value of the midpoint must
+equal the value of the expression. The :class:`~cassowary.Constraint` is then
+added to the solver system::
 
     for start, end in [(0, 1), (1, 2), (2, 3), (3, 0)]:
         cle = (points[start].x + points[end].x) / 2
@@ -106,16 +106,17 @@ stays on the left, and the top stays on top::
     solver.add_constraint(points[3].y + 20 <= points[1].y)
     solver.add_constraint(points[3].y + 20 <= points[2].y)
 
-Each of these constraints is posed as an :class:`Constraint`. For example, the first
-expression describes a point 20 pixels to the right of the x coordinate of the top
-left point. This :class:`Constraint` is then added as a constraint on the x coordinate
-of the bottom right (point 2) and top right (point 3) corners - the x coordinate of these
-points must be at least 20 pixels greater than the x coordinate of the top left corner
-(point 0).
+Each of these constraints is posed as an :class:`~cassowary.Constraint`. For
+example, the first expression describes a point 20 pixels to the right of the
+x coordinate of the top left point. This :class:`~cassowary.Constraint` is
+then added as a constraint on the x coordinate of the bottom right (point 2)
+and top right (point 3) corners - the x coordinate of these points must be at
+least 20 pixels greater than the x coordinate of the top left corner (point
+0).
 
-Lastly, we set the overall constraints -- the constraints that limit how large our
-2D canvas is. We'll constraint the canvas to be 500x500 pixels, and require that all
-points fall on that canvas::
+Lastly, we set the overall constraints -- the constraints that limit how large
+our 2D canvas is. We'll constraint the canvas to be 500x500 pixels, and
+require that all points fall on that canvas::
 
     for point in points:
         solver.add_constraint(point.x >= 0)
@@ -136,25 +137,23 @@ layout questions. The most obvious question -- where are the midpoints?
     >>> midpoints[3]
     (105.0, 10.0)
 
-You can see from this that the midpoints have been positioned exactly where you'd
-expect - half way between the corners - without having to explicitly specify their
-positions.
+You can see from this that the midpoints have been positioned exactly where
+you'd expect - half way between the corners - without having to explicitly
+specify their positions.
 
-These relationships will be maintained if we then edit the position of the corners.
-Lets move the position of the bottom right corner (point 2). We mark the variables
-associated with that corner as being **Edit variables**::
+These relationships will be maintained if we then edit the position of the
+corners. Lets move the position of the bottom right corner (point 2). We mark
+the variables associated with that corner as being **Edit variables**::
 
     solver.add_edit_var(points[2].x)
     solver.add_edit_var(points[2].y)
 
 Then, we start an edit, change the coordinates of the corner, and stop the edit::
 
-    solver.begin_edit()
+    with solver.edit():
 
-    solver.suggest_value(points[2].x, 300)
-    solver.suggest_value(points[2].y, 400)
-
-    solver.end_edit()
+        solver.suggest_value(points[2].x, 300)
+        solver.suggest_value(points[2].y, 400)
 
 As a result of this edit, the midpoints have automatically been updated::
 
@@ -167,8 +166,8 @@ As a result of this edit, the midpoints have automatically been updated::
     >>> midpoints[3]
     (105.0, 10.0)
 
-If you want, you can now repeat the edit process for any of the points - including
-the midpoints.
+If you want, you can now repeat the edit process for any of the points -
+including the midpoints.
 
 GUI layout
 ----------
@@ -228,8 +227,9 @@ window on which the buttons will be placed::
     solver.add_stay(right_limit, WEAK)
 
 The left limit is set as a ``REQUIRED`` constraint -- the left border can't
-move from coordinate 0. However, the window can expand if necessary to accomodate
-the widgets it contains, so the right limit is a ``WEAK`` constraint.
+move from coordinate 0. However, the window can expand if necessary to
+accomodate the widgets it contains, so the right limit is a ``WEAK``
+constraint.
 
 Now we can define the constraints on the button layouts::
 
@@ -259,8 +259,9 @@ Now we can define the constraints on the button layouts::
     # Button2's preferred width is 113
     solver.add_constraint(b2.width == 113, strength=STRONG)
 
-Since we haven't imposed a hard constraint on the right hand side, the constraint
-system will give us the smallest window that will satisfy these constraints::
+Since we haven't imposed a hard constraint on the right hand side, the
+constraint system will give us the smallest window that will satisfy these
+constraints::
 
     >>> b1
     (x=50.0, width=113.0)
@@ -270,9 +271,10 @@ system will give us the smallest window that will satisfy these constraints::
     >>> right_limit.value
     426.0
 
-That is, the smallest window that can accomodate these constraints is 426 pixels
-wide. However, if the user makes the window larger, we can still lay out widgets.
-We impose a new ``REQUIRED`` constraint with the size of the window::
+That is, the smallest window that can accomodate these constraints is 426
+pixels wide. However, if the user makes the window larger, we can still lay
+out widgets. We impose a new ``REQUIRED`` constraint with the size of the
+window::
 
     right_limit.value = 500
     right_limit_stay = solver.add_constraint(right_limit, strength=REQUIRED)
@@ -285,12 +287,13 @@ We impose a new ``REQUIRED`` constraint with the size of the window::
     >>> right_limit.value
     500.0
 
-That is - if the window size is 500 pixels, the layout will compensate by putting
-``button2`` a little further to the right. The ``WEAK`` stay on the right limit that
-we established at the start is ignored in preference for the ``REQUIRED`` stay.
+That is - if the window size is 500 pixels, the layout will compensate by
+putting ``button2`` a little further to the right. The ``WEAK`` stay on the
+right limit that we established at the start is ignored in preference for the
+``REQUIRED`` stay.
 
-If the window is then resized again, we can remove the 500 pixel limit, and impose
-a new limit::
+If the window is then resized again, we can remove the 500 pixel limit, and
+impose a new limit::
 
     solver.remove_constraint(right_limit_stay)
 
