@@ -1,3 +1,5 @@
+from __future__ import print_function, unicode_literals, absolute_import
+
 from .expression import Variable
 from .error import RequiredFailure, ConstraintNotFound, InternalError
 from .simplex_solver import SimplexSolver
@@ -68,4 +70,4 @@ def part_string(part, i):
             s = '.' + s
     return s
 
-VERSION = "".join(part_string(nv, i) for i, nv in enumerate(NUM_VERSION))
+VERSION = ''.join(part_string(nv, i) for i, nv in enumerate(NUM_VERSION))

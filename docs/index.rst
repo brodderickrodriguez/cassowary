@@ -10,7 +10,8 @@ layout mechanism.
 Quickstart
 ----------
 
-In your virtualenv, install Cassowary::
+Cassowary is compatible with both Python 2 or Python 3. To install Cassowary
+in your virtualenv, run::
 
     $ pip install cassowary
 
@@ -30,7 +31,6 @@ Documentation
    internals/contributing
    internals/roadmap
    internals/releases
-
 
 Community
 ---------
@@ -64,4 +64,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-

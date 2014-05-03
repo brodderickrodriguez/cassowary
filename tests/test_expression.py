@@ -1,10 +1,11 @@
+from __future__ import print_function, unicode_literals, absolute_import, division
+
 from unittest import TestCase
 
 from cassowary import InternalError, Variable
 
 # Internals
-from cassowary.expression import Expression
-from cassowary.variable import SlackVariable
+from cassowary.expression import Expression, SlackVariable
 
 
 class ExpressionTestCase(TestCase):

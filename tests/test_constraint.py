@@ -1,3 +1,5 @@
+from __future__ import print_function, unicode_literals, absolute_import, division
+
 from unittest import TestCase
 
 from cassowary import Variable, SimplexSolver, STRONG, WEAK

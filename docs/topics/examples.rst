@@ -114,7 +114,8 @@ points must be at least 20 pixels greater than the x coordinate of the top left 
 (point 0).
 
 Lastly, we set the overall constraints -- the constraints that limit how large our
-2D canvas is. We'll constraint the canvas to be 500x500 pixels::
+2D canvas is. We'll constraint the canvas to be 500x500 pixels, and require that all
+points fall on that canvas::
 
     for point in points:
         solver.add_constraint(point.x >= 0)
@@ -124,15 +125,15 @@ Lastly, we set the overall constraints -- the constraints that limit how large o
         solver.add_constraint(point.y <= 500)
 
 This gives us a fully formed constraint system. Now we can use it to answer
-layout questions. The most obvious initial question -- where are the midpoints?
+layout questions. The most obvious question -- where are the midpoints?
 
-    >>> print midpoints[0]
+    >>> midpoints[0]
     (10.0, 105.0)
-    >>> print midpoints[1]
+    >>> midpoints[1]
     (105.0, 200.0)
-    >>> print midpoints[2]
+    >>> midpoints[2]
     (200.0, 105.0)
-    >>> print midpoints[3]
+    >>> midpoints[3]
     (105.0, 10.0)
 
 You can see from this that the midpoints have been positioned exactly where you'd
@@ -141,7 +142,7 @@ positions.
 
 These relationships will be maintained if we then edit the position of the corners.
 Lets move the position of the bottom right corner (point 2). We mark the variables
-associated with that corner as being *Edit variables*::
+associated with that corner as being **Edit variables**::
 
     solver.add_edit_var(points[2].x)
     solver.add_edit_var(points[2].y)
@@ -157,13 +158,13 @@ Then, we start an edit, change the coordinates of the corner, and stop the edit:
 
 As a result of this edit, the midpoints have automatically been updated::
 
-    >>> print midpoints[0]
+    >>> midpoints[0]
     (10.0, 105.0)
-    >>> print midpoints[1]
+    >>> midpoints[1]
     (155.0, 300.0)
-    >>> print midpoints[2]
+    >>> midpoints[2]
     (250.0, 205.0)
-    >>> print midpoints[3]
+    >>> midpoints[3]
     (105.0, 10.0)
 
 If you want, you can now repeat the edit process for any of the points - including
@@ -261,12 +262,12 @@ Now we can define the constraints on the button layouts::
 Since we haven't imposed a hard constraint on the right hand side, the constraint
 system will give us the smallest window that will satisfy these constraints::
 
-    >>> print b1
+    >>> b1
     (x=50.0, width=113.0)
-    >>> print b2
+    >>> b2
     (x=263.0, width=113.0)
 
-    >>> print right_limit.value
+    >>> right_limit.value
     426.0
 
 That is, the smallest window that can accomodate these constraints is 426 pixels
@@ -276,12 +277,12 @@ We impose a new ``REQUIRED`` constraint with the size of the window::
     right_limit.value = 500
     right_limit_stay = solver.add_constraint(right_limit, strength=REQUIRED)
 
-    >>> print b1
+    >>> b1
     (x=50.0, width=113.0)
-    >>> print b2
+    >>> b2
     (x=337.0, width=113.0)
 
-    >>> print right_limit.value
+    >>> right_limit.value
     500.0
 
 That is - if the window size is 500 pixels, the layout will compensate by putting
@@ -297,12 +298,12 @@ a new limit::
     right_limit_stay = solver.add_constraint(right_limit, strength=REQUIRED)
     solver.add_constraint(right_limit_stay)
 
-    >>> print b1
+    >>> b1
     (x=50.0, width=113.0)
-    >>> print b2
+    >>> b2
     (x=312.0, width=113.0)
 
-    >>> print right_limit.value
+    >>> right_limit.value
     475.0
 
 Again, ``button2`` has been moved, this time to the left, compensating for the

@@ -1,3 +1,5 @@
+from __future__ import print_function, unicode_literals, absolute_import, division
+
 
 class Tableau(object):
     def __init__(self):
@@ -35,7 +37,7 @@ class Tableau(object):
             self.columns.setdefault(var, set()).add(subject)
 
     def add_row(self, var, expr):
-        # print 'add_row', var, expr
+        # print('add_row', var, expr)
         self.rows[var] = expr
 
         for clv in expr.terms:
@@ -46,7 +48,7 @@ class Tableau(object):
         if var.is_external:
             self.external_rows.add(var)
 
-        # print self
+        # print(self)
 
     def remove_column(self, var):
         rows = self.columns.pop(var, None)
@@ -68,13 +70,13 @@ class Tableau(object):
                 pass
 
     def remove_row(self, var):
-        # print "remove_row", var
+        # print("remove_row", var)
         expr = self.rows.pop(var)
 
         for clv in expr.terms.keys():
             varset = self.columns[clv]
             if varset:
-                # print "removing from varset", var
+                # print("removing from varset", var)
                 varset.remove(var)
 
         try:
@@ -86,7 +88,7 @@ class Tableau(object):
                 self.external_rows.remove(var)
             except KeyError:
                 pass
-        # print "remove_row returning", expr
+        # print("remove_row returning", expr)
         return expr
 
     def substitute_out(self, oldVar, expr):

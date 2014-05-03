@@ -1,9 +1,11 @@
+from __future__ import print_function, unicode_literals, absolute_import, division
+
 from unittest import TestCase
 
 from cassowary import Variable
 
 # Internals
-from cassowary.variable import DummyVariable, SlackVariable, ObjectiveVariable
+from cassowary.expression import DummyVariable, SlackVariable, ObjectiveVariable
 
 
 class VariableTestCase(TestCase):

@@ -1,3 +1,5 @@
+from __future__ import print_function, unicode_literals, absolute_import, division
+
 import random
 from unittest import TestCase
 
@@ -551,6 +553,8 @@ class EndToEndTestCase(TestCase):
             def __repr__(self):
                 return u'(%s, %s)' % (self.x.value, self.y.value)
 
+            __hash__ = object.__hash__
+
             def __eq__(self, other):
                 return self.x.value == other[0] and self.y.value == other[1]
 
@@ -750,8 +754,6 @@ class EndToEndTestCase(TestCase):
         self.assertAlmostEqual(right.value, left.value + 10)
         self.assertGreaterEqual(left.value, 0)
         self.assertLessEqual(right.value, 100)
-
-        print left.value, middle.value, right.value
 
         # But more than that - since we gave a position for middle, we know
         # where all the points should be.

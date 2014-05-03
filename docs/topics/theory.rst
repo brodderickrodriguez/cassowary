@@ -1,10 +1,12 @@
 Solving constraint systems
 ==========================
 
-A linear  programming problem is a problem where you have a set of non-
-negative, real valued variables (``x[1], x[2], ... x[n]``), and a
-series of linear constraints on those variables. These constraints are
-expressed as a set of equations of the form:
+Constraint solving systems are an algorithmic approach to solving Linear
+Programming problems. A linear programming problem is a mathematical problem
+where you have a set of non- negative, real valued variables (``x[1], x[2],
+... x[n]``), and a series of linear constraints (i.e, no exponential terms) on
+those variables. These constraints are expressed as a set of equations of the
+form:
 
     ``a[1]x[1] + ... + a[n]x[n] = b``,
 
@@ -12,25 +14,28 @@ expressed as a set of equations of the form:
 
     ``a[1]x[1] + ... + a[n]x[n] >= b``,
 
-Given these contraints, the problem is to find the values of x[i] that
-minimizes or maximizes the value of the `objective function`:
+Given these contraints, the problem is to find the values of ``x[i]`` that
+minimizes or maximizes the value of an **objective function**:
 
     ``c + d[1]x[1] + ... + d[n]x[n]``
 
 Cassowary is an algorithm designed to solve linear programming problems of
-this type. This library provides the tools to describe a set of constraints,
-and then find an optimal solution for that set of constraints.
+this type. Published in 1997, it now forms the basis fo the UI layout  tools
+in OS X Lion, and iOS 6+ (the approach known as `Auto Layout`_). The Cassowary
+algorithm (and this implementation of it) provides the tools to describe a set
+of constraints, and then find an optimal solution for that set of constraints.
+
+.. _Auto Layout: https://developer.apple.com/library/ios/documentation/userexperience/conceptual/AutolayoutPG/Introduction/Introduction.html
 
 Variables
 ---------
 
-At the core of the constraint system are the variables in the system.
+At the core of the constraint problem are the variables in the system.
 In the formal mathematical system, these are the ``x[n]`` terms; in Python,
 these are rendered as instances of the :class:`Variable` class.
 
-Each variable is named, and can accept
-
-To create a variable, instantiate an instance of :class:`Variable`::
+Each variable is named, and can accept a default value. To create a variable,
+instantiate an instance of :class:`Variable`::
 
     from cassowary import Variable
 
@@ -44,13 +49,13 @@ Any value provided for the variable is just a starting point. When constraints
 are imposed, this value can and will change, subject to the requirements of
 the constraints. However, providing an initial value may affect the search process;
 if there's an ambiguity in the constraints (i.e., there's more than one
-possible solution), the initial value provided to variables will affect which
-solution the system converges on.
+possible solution), the initial value provided to variables will affect the solution
+on which the system converges.
 
 Constraints
 -----------
 
-An constraint is the mathematical equality or inequality that defines the linear
+A constraint is a mathematical equality or inequality that defines the linear
 programming system.
 
 A constraint is declared by providing the Python expression that encompasses the
@@ -68,25 +73,27 @@ raw mathematical expression::
     constraint = x1 + 3 * x2 <= 4 * x3 + 2
 
 In this example, `constraint` holds the defintion for the constraint system.
-The comparison operators `<=`, `<`, `>=`, `>`, and `==` have been overridden
-for instances of :class:`Variable` to enable you to easily define constraints.
+Although the statement uses the Python comparison operator `<=`, the result is
+*not* a boolean. The comparison operators `<=`, `<`, `>=`, `>`, and `==` have
+been overridden for instances of :class:`Variable` to enable you to easily
+define constraints.
 
 Solvers
 -------
 
 The solver is the engine that resolves the linear constraints into a solution.
 There are many approaches to this problem, and the development of algorithmic
-approaches has been the subject of computer science research for 40 years. Cassowary
-provides one implementation -- a :class:`SimplexSolver`, implementing the Simplex
-algorithm defined by Dantzig in the 1940s.
+approaches has been the subject of math and computer science research for over
+70 years. Cassowary provides one implementation -- a :class:`SimplexSolver`,
+implementing the Simplex algorithm defined by Dantzig in the 1940s.
 
 The solver takes no arguments during constructions; once constructed, you simply
 add constraints to the system.
 
-As a simple example, let's solve the problem posed in Section 2 of the
-`Badros & Borning's paper on Cassowary`_. In this problem, we have a 1 dimensional
-number line spanning from 0 to 100. There are three points on it (left, middle and right), with
-the following constraints:
+As a simple example, let's solve the problem posed in Section 2 of the `Badros
+& Borning's paper on Cassowary`_. In this problem, we have a 1 dimensional
+number line spanning from 0 to 100. There are three points on it (left, middle
+and right), with the following constraints:
 
 * The middle point must be halfway between the left and right point;
 * The left point must be at least 10 to the left of the right point;
@@ -107,15 +114,15 @@ This system can be defined in Python as follows::
     solver.add_constraint(right <= 100)
     solver.add_constraint(left >= 0)
 
+There are an infinite number of possible solutions to this system; if we
+interrogate the variables, you'll see that the solver has provided one
+possible solution::
 
-There are many possible solutions to this system; if we interrogate the variables,
-you'll see that the solver has provided one possible solution::
-
-    >>> print left.value
+    >>> left.value
     90.0
-    >>> print middle.value
+    >>> middle.value
     95.0
-    >>> print right.value
+    >>> right.value
     100.0
 
 .. _Badros & Borning's paper on Cassowary: http://www.cs.washington.edu/research/constraints/cassowary/cassowary-tr.pdf
@@ -123,9 +130,9 @@ you'll see that the solver has provided one possible solution::
 Stay constraints
 ----------------
 
-If we want a particular solution, we need to fix a value somewhere. To do
-this, we add a Stay - a special constraint that says that the value should
-not be altered.
+If we want a particular solution to our left/right/middle problem, we need to
+fix a value somewhere. To do this, we add a `Stay` - a special constraint that
+says that the value should not be altered.
 
 For example, we might want to enforce the fact that the middle value should
 stay at a value of 45. We construct the system as before, but add::
@@ -136,11 +143,11 @@ stay at a value of 45. We construct the system as before, but add::
 Now when we interrogate the solver, we'll get values that reflect this fixed
 point::
 
-    >>> print left.value
+    >>> left.value
     40.0
-    >>> print middle.value
+    >>> middle.value
     45.0
-    >>> print right.value
+    >>> right.value
     50.0
 
 Constraint strength
@@ -150,8 +157,8 @@ Not all constraints are equal. Some are absolute requirements - for example, a
 requirement that all values remain in a specific range. However, other
 constraints may be suggestions, rather than hard requirements.
 
-To accomodate this, Cassowary allows all constraints to have a strength.
-Strength can  be one of:
+To accomodate this, Cassowary allows all constraints to have a **strength**.
+Strength can be one of:
 
 * ``REQUIRED``
 * ``STRONG``

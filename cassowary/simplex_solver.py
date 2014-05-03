@@ -1,11 +1,10 @@
-from .constraint import StayConstraint, EditConstraint
+from __future__ import print_function, unicode_literals, absolute_import, division
+
 from .edit_info import EditInfo
 from .error import RequiredFailure, ConstraintNotFound, InternalError
-from .expression import Expression
-from .strength import STRONG, WEAK
+from .expression import Expression, StayConstraint, EditConstraint, ObjectiveVariable, SlackVariable, DummyVariable
 from .tableau import Tableau
-from .variable import ObjectiveVariable, SlackVariable, DummyVariable
-from .utils import approx_equal, EPSILON
+from .utils import approx_equal, EPSILON, STRONG, WEAK
 
 
 class SimplexSolver(Tableau):
@@ -46,7 +45,7 @@ class SimplexSolver(Tableau):
             if weight:
                 cn.weight = weight
 
-        # print 'add_constraint', cn
+        # print('add_constraint', cn)
         expr, eplus, eminus, prev_edit_constant = self.new_expression(cn)
 
         if not self.try_adding_directly(expr):
@@ -66,7 +65,7 @@ class SimplexSolver(Tableau):
         return cn
 
     def add_edit_var(self, v, strength=STRONG):
-        # print "add_edit_var", v, strength
+        # print("add_edit_var", v, strength)
         return self.add_constraint(EditConstraint(v, strength))
 
     def remove_edit_var(self, v):
@@ -89,9 +88,9 @@ class SimplexSolver(Tableau):
     #######################################################################
 
     def new_expression(self, cn):
-        # print "* new_expression", cn
-        # print "cn.is_inequality == ", cn.is_inequality
-        # print "cn.is_required == ", cn.is_required
+        # print("* new_expression", cn)
+        # print("cn.is_inequality == ", cn.is_inequality)
+        # print("cn.is_required == ", cn.is_required)
         expr = Expression(constant=cn.expression.constant)
         eplus = None
         eminus = None
@@ -104,7 +103,7 @@ class SimplexSolver(Tableau):
                 expr.add_expression(e, c)
 
         if cn.is_inequality:
-            # print "Inequality, adding slack"
+            # print("Inequality, adding slack")
             self.slack_counter = self.slack_counter + 1
             slack_var = SlackVariable(prefix='s', number=self.slack_counter)
             expr.set_variable(slack_var, -1)
@@ -120,7 +119,7 @@ class SimplexSolver(Tableau):
                 self.note_added_variable(eminus, self.objective)
         else:
             if cn.is_required:
-                # print "Equality, required"
+                # print("Equality, required")
                 self.dummy_counter = self.dummy_counter + 1
                 dummy_var = DummyVariable(number=self.dummy_counter)
                 eplus = dummy_var
@@ -128,9 +127,9 @@ class SimplexSolver(Tableau):
                 prev_edit_constant = cn.expression.constant
                 expr.set_variable(dummy_var, 1)
                 self.marker_vars[cn] = dummy_var
-                # print "Adding dummy_var == d%s" % self.dummy_counter
+                # print("Adding dummy_var == d%s" % self.dummy_counter)
             else:
-                # print "Equality, not required"
+                # print("Equality, not required")
                 self.slack_counter = self.slack_counter + 1
                 eplus = SlackVariable(prefix='ep', number=self.slack_counter)
                 eminus = SlackVariable(prefix='em', number=self.slack_counter)
@@ -139,11 +138,11 @@ class SimplexSolver(Tableau):
                 self.marker_vars[cn] = eplus
 
                 z_row = self.rows[self.objective]
-                # print "z_row", z_row
+                # print("z_row", z_row)
                 sw_coeff = cn.strength * cn.weight
                 # if sw_coeff == 0:
-                #     print "cn ==", cn
-                #     print "adding ", eplus, "and", eminus, "with sw_coeff", sw_coeff
+                #     print("cn ==", cn)
+                #     print("adding ", eplus, "and", eminus, "with sw_coeff", sw_coeff)
                 z_row.set_variable(eplus, sw_coeff)
                 self.note_added_variable(eplus, self.objective)
                 z_row.set_variable(eminus, sw_coeff)
@@ -157,7 +156,7 @@ class SimplexSolver(Tableau):
                 elif cn.is_edit_constraint:
                     prev_edit_constant = cn.expression.constant
 
-        # print 'new_expression returning:', expr
+        # print('new_expression returning:', expr)
         if expr.constant < 0:
             expr.multiply(-1.0)
         return expr, eplus, eminus, prev_edit_constant
@@ -167,9 +166,13 @@ class SimplexSolver(Tableau):
 
     def remove_edit_vars_to(self, n):
         try:
+            removals = []
             for v, cei in self.edit_var_map.items():
                 if cei.index >= n:
-                    self.remove_edit_var(v)
+                    removals.append(v)
+
+            for v in removals:
+                self.remove_edit_var(v)
 
             assert len(self.edit_var_map) == n
 
@@ -180,85 +183,85 @@ class SimplexSolver(Tableau):
         return self.add_constraint(StayConstraint(v, strength, weight))
 
     def remove_constraint(self, cn):
-        # print "removeConstraint", cn
-        # print self
+        # print("removeConstraint", cn)
+        # print(self)
         self.needs_solving = True
         self.reset_stay_constants()
         z_row = self.rows[self.objective]
 
         e_vars = self.error_vars.get(cn)
-        # print "e_vars ==", e_vars
+        # print("e_vars ==", e_vars)
         if e_vars:
             for cv in e_vars:
                 try:
                     z_row.add_expression(self.rows[cv], -cn.weight * cn.strength, self.objective, self)
-                    # print 'add expression', self.rows[cv]
+                    # print('add expression', self.rows[cv])
                 except KeyError:
                     z_row.add_variable(cv, -cn.weight * cn.strength, self.objective, self)
-                    # print 'add variable', cv
+                    # print('add variable', cv)
 
         try:
             marker = self.marker_vars.pop(cn)
         except KeyError:
             raise ConstraintNotFound()
 
-        # print "Looking to remove var", marker
+        # print("Looking to remove var", marker)
         if not self.rows.get(marker):
             col = self.columns[marker]
-            # print "Must pivot -- columns are", col
+            # print("Must pivot -- columns are", col)
             exit_var = None
             min_ratio = 0.0
             for v in col:
-                # print 'check var', v
+                # print('check var', v)
                 if v.is_restricted:
-                    # print 'var', v, ' is restricted'
+                    # print('var', v, ' is restricted')
                     expr = self.rows[v]
                     coeff = expr.coefficient_for(marker)
-                    # print "Marker", marker, "'s coefficient in", expr, "is", coeff
+                    # print("Marker", marker, "'s coefficient in", expr, "is", coeff)
                     if coeff < 0:
                         r = -expr.constant / coeff
                         if exit_var is None or r < min_ratio: # EXTRA BITS IN JS?
-                            # print 'set exit var = ',v,r
+                            # print('set exit var = ',v,r)
                             min_ratio = r
                             exit_var = v
 
             if exit_var is None:
-                # print "exit_var is still None"
+                # print("exit_var is still None")
                 for v in col:
-                    # print 'check var', v
+                    # print('check var', v)
                     if v.is_restricted:
-                        # print 'var', v, ' is restricted'
+                        # print('var', v, ' is restricted')
                         expr = self.rows[v]
                         coeff = expr.coefficient_for(marker)
-                        # print "Marker", marker, "'s coefficient in", expr, "is", coeff
+                        # print("Marker", marker, "'s coefficient in", expr, "is", coeff)
                         r = expr.constant / coeff
                         if exit_var is None or r < min_ratio:
-                            # print 'set exit var = ',v,r
+                            # print('set exit var = ',v,r)
                             min_ratio = r
                             exit_var = v
 
             if exit_var is None:
-                # print "exit_var is still None (again)"
+                # print("exit_var is still None (again)")
                 if len(col) == 0:
-                    # print 'remove column',marker
+                    # print('remove column',marker)
                     self.remove_column(marker)
                 else:
                     exit_var = [v for v in col if v != self.objective][-1] # ??
-                    # print 'set exit var', exit_var
+                    # print('set exit var', exit_var)
 
             if exit_var is not None:
-                # print 'Pivot', marker, exit_var,
+                # print('Pivot', marker, exit_var,)
                 self.pivot(marker, exit_var)
 
         if self.rows.get(marker):
-            # print 'remove row', marker
+            # print('remove row', marker)
             expr = self.remove_row(marker)
 
         if e_vars:
-            # print 'e_vars exist'
+            # print('e_vars exist')
             for v in e_vars:
                 if v != marker:
-                    # print 'remove column',v
+                    # print('remove column',v)
                     self.remove_column(v)
 
         if cn.is_stay_constraint:
@@ -269,13 +272,13 @@ class SimplexSolver(Tableau):
                     p_evar, m_evar = self.stay_error_vars.pop()
                     found = False
                     try:
-                        # print 'stay constraint - remove plus evar', p_evar
+                        # print('stay constraint - remove plus evar', p_evar)
                         e_vars.remove(p_evar)
                         found = True
                     except KeyError:
                         pass
                     try:
-                        # print 'stay constraint - remove minus evar', m_evar
+                        # print('stay constraint - remove minus evar', m_evar)
                         e_vars.remove(m_evar)
                         found = True
                     except KeyError:
@@ -286,17 +289,17 @@ class SimplexSolver(Tableau):
 
         elif cn.is_edit_constraint:
             assert e_vars is not None
-            # print 'edit constraint - remove column', self.edit_var_map[cn.variable].edit_minus
+            # print('edit constraint - remove column', self.edit_var_map[cn.variable].edit_minus)
             self.remove_column(self.edit_var_map[cn.variable].edit_minus)
             del self.edit_var_map[cn.variable]
 
         if e_vars:
             for e_var in e_vars:
-                # print 'Remove error var', e_var
+                # print('Remove error var', e_var)
                 del self.error_vars[e_var]
 
         if self.auto_solve:
-            # print 'final auto solve'
+            # print('final auto solve')
             self.optimize(self.objective)
             self.set_external_variables()
 
@@ -321,7 +324,7 @@ class SimplexSolver(Tableau):
         cei = self.edit_var_map.get(v)
         if not cei:
             raise InternalError("suggestValue for variable " + v + ", but var is not an edit variable")
-        # print cei
+        # print(cei)
         delta = x - cei.prev_edit_constant
         cei.prev_edit_constant = x
         self.delta_edit_constant(delta, cei.edit_plus, cei.edit_minus)
@@ -348,47 +351,47 @@ class SimplexSolver(Tableau):
             self.add_stay(v)
 
     def add_with_artificial_variable(self, expr):
-        # print "add_with_artificial_variable", expr
+        # print("add_with_artificial_variable", expr)
         self.artificial_counter = self.artificial_counter + 1
         av = SlackVariable(prefix='a', number=self.artificial_counter)
         az = ObjectiveVariable('az')
         az_row = expr.clone()
-        # print 'Before add_rows'
-        # print self
+        # print('Before add_rows')
+        # print(self)
         self.add_row(az, az_row)
         self.add_row(av, expr)
-        # print 'after add_rows'
-        # print self
+        # print('after add_rows')
+        # print(self)
         self.optimize(az)
         az_tableau_row = self.rows[az]
-        # print "azTableauRow.constant =", az_tableau_row.constant
+        # print("azTableauRow.constant =", az_tableau_row.constant)
         if not approx_equal(az_tableau_row.constant, 0.0):
-            # print "azTableauRow.constant is 0"
+            # print("azTableauRow.constant is 0")
             self.remove_row(az)
             self.remove_column(av)
             raise RequiredFailure()
 
         e = self.rows.get(av)
         if e != None:
-            # print "av exists"
+            # print("av exists")
             if e.is_constant:
-                # print "av is constant"
+                # print("av is constant")
                 self.remove_row(av)
                 self.remove_row(az)
                 return
             entry_var = e.any_pivotable_variable()
             self.pivot(entry_var, av)
 
-        # print "av shouldn't exist now"
+        # print("av shouldn't exist now")
         assert av not in self.rows
         self.remove_column(av)
         self.remove_row(az)
 
     def try_adding_directly(self, expr):
-        # print "try_adding_directly", expr
+        # print("try_adding_directly", expr)
         subject = self.choose_subject(expr)
         if subject is None:
-            # print "try_adding_directly returning: False"
+            # print("try_adding_directly returning: False")
             return False
 
         expr.new_subject(subject)
@@ -396,11 +399,11 @@ class SimplexSolver(Tableau):
             self.substitute_out(subject, expr)
 
         self.add_row(subject, expr)
-        # print "try_adding_directly returning: True"
+        # print("try_adding_directly returning: True")
         return True
 
     def choose_subject(self, expr):
-        # print 'choose_subject', expr
+        # print('choose_subject', expr)
         subject = None
         found_unrestricted = False
         found_new_restricted = False
@@ -498,28 +501,28 @@ class SimplexSolver(Tableau):
                     self.pivot(entry_var, exit_var)
 
     def optimize(self, z_var):
-        # print "optimize", z_var
-        # print self
+        # print("optimize", z_var)
+        # print(self)
         self.optimize_count = self.optimize_count + 1
 
         z_row = self.rows[z_var]
         entry_var = None
         exit_var = None
 
-        # print self.objective
-        # print z_var
-        # print self.rows[self.objective]
-        # print self.rows[z_var]
+        # print(self.objective)
+        # print(z_var)
+        # print(self.rows[self.objective])
+        # print(self.rows[z_var])
 
         while True:
             objective_coeff = 0.0
 
             # Not convinced the sort is correct here; but test suite
             # doesn't pass reliably without it.
-            for v, c in sorted(z_row.terms.items()):
-                # print 'term check', v, v.is_pivotable, c
+            for v, c in sorted(z_row.terms.items(), key=lambda x: x[0].name):
+                # print('term check', v, v.is_pivotable, c)
                 if v.is_pivotable and c < objective_coeff:
-                    # print 'candidate found'
+                    # print('candidate found')
                     objective_coeff = c
                     entry_var = v
                     break;
@@ -527,18 +530,18 @@ class SimplexSolver(Tableau):
             if objective_coeff >= -EPSILON or entry_var is None:
                 return
 
-            # print 'entry_var:', entry_var
-            # print "objective_coeff:", objective_coeff
+            # print('entry_var:', entry_var)
+            # print("objective_coeff:", objective_coeff)
 
             min_ratio = float('inf')
             r = 0
 
             for v in self.columns[entry_var]:
-                # print "checking", v
+                # print("checking", v)
                 if v.is_pivotable:
                     expr = self.rows[v]
                     coeff = expr.coefficient_for(entry_var)
-                    # print 'pivotable, coeff =', coeff
+                    # print('pivotable, coeff =', coeff)
                     if coeff < 0:
                         r = -expr.constant / coeff
                         if r < min_ratio:
@@ -550,14 +553,14 @@ class SimplexSolver(Tableau):
 
             self.pivot(entry_var, exit_var)
 
-            # print self
+            # print(self)
 
     def pivot(self, entry_var, exit_var):
-        # print 'pivot:',entry_var, exit_var
+        # print('pivot:',entry_var, exit_var)
         if entry_var is None:
-            print "WARN - entry_var is None"
+            print("WARN - entry_var is None")
         if exit_var is None:
-            print "WARN - exit_var is None"
+            print("WARN - exit_var is None")
 
         p_expr = self.remove_row(exit_var)
         p_expr.change_subject(exit_var, entry_var)
@@ -565,7 +568,7 @@ class SimplexSolver(Tableau):
         self.add_row(entry_var, p_expr)
 
     def reset_stay_constants(self):
-        # print "reset_stay_constants"
+        # print("reset_stay_constants")
         for p_var, m_var in self.stay_error_vars:
             expr = self.rows.get(p_var)
             if expr is None:
@@ -574,11 +577,11 @@ class SimplexSolver(Tableau):
                 expr.constant = 0.0
 
     def set_external_variables(self):
-        # print "set_external_variables"
-        # print self
+        # print("set_external_variables")
+        # print(self)
         for v in self.external_parametric_vars:
             if self.rows.get(v):
-                # print "Variable %s in external_parametric_vars is basic" % v
+                # print("Variable %s in external_parametric_vars is basic" % v)
                 continue
             v.value = 0.0
 
@@ -589,7 +592,7 @@ class SimplexSolver(Tableau):
         self.needs_solving = False
 
     def insert_error_var(self, cn, var):
-        # print 'insert_error_var', cn, var
+        # print('insert_error_var', cn, var)
         constraint_set = self.error_vars.get(var)
         if not constraint_set:
             constraint_set = set()

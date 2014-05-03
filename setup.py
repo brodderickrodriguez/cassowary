@@ -29,8 +29,9 @@ setup(
         'License :: OSI Approved :: BSD License',
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 2',
-        'Topic :: Software Development',
-        'Topic :: Utilities',
+        'Programming Language :: Python :: 3',
+        'Topic :: Scientific/Engineering :: Mathematics',
+        'Topic :: Software Development :: Libraries :: Python Modules'
     ],
     test_suite='tests'
 )

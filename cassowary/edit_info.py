@@ -1,3 +1,5 @@
+from __future__ import print_function, unicode_literals, absolute_import, division
+
 
 class EditInfo(object):
     def __init__(self, constraint, edit_plus, edit_minus, prev_edit_constant, index):
@@ -8,7 +10,7 @@ class EditInfo(object):
         self.index = index
 
     def __repr__(self):
-        return u'<cn=%s ep=%s em=%s pec=%s index=%s>' % (
+        return '<cn=%s ep=%s em=%s pec=%s index=%s>' % (
             self.constraint,
             self.edit_plus,
             self.edit_minus,

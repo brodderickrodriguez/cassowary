@@ -1,6 +1,7 @@
+from __future__ import print_function, unicode_literals, absolute_import, division
+
 from .error import InternalError
-from .utils import approx_equal
-from .strength import REQUIRED, STRONG, repr_strength
+from .utils import approx_equal, REQUIRED, STRONG, repr_strength
 
 ###########################################################################
 # Variables
@@ -30,6 +31,9 @@ class AbstractVariable(object):
                 raise TypeError('Cannot multiply variable by non-constant expression')
         else:
             raise TypeError('Cannot multiply variable by object of type %s' % type(x))
+
+    def __truediv__(self, x):
+        return self.__div__(x)
 
     def __div__(self, x):
         if isinstance(x, (float, int)):
@@ -86,6 +90,8 @@ class Variable(AbstractVariable):
 
     def __repr__(self):
         return '%s[%s]' % (self.name, self.value)
+
+    __hash__ = object.__hash__
 
     def __eq__(self, other):
         if isinstance(other, (Expression, Variable, float, int)):
@@ -212,6 +218,9 @@ class Expression(object):
             raise TypeError('Cannot multiply expression by object of type %s' % type(x))
         return result
 
+    def __truediv__(self, x):
+        return self.__div__(x)
+
     def __div__(self, x):
         if isinstance(x, (float, int)):
             if approx_equal(x, 0):
@@ -283,6 +292,8 @@ class Expression(object):
     ######################################################################
     # Mathematical operators
     ######################################################################
+
+    __hash__ = object.__hash__
 
     def __eq__(self, other):
         if isinstance(other, (Expression, Variable, float, int)):
@@ -418,7 +429,7 @@ class AbstractConstraint(object):
         return self.strength == REQUIRED
 
     def __repr__(self):
-        return u'%s:{%s}(%s)' % (repr_strength(self.strength), self.weight, self.expression)
+        return '%s:{%s}(%s)' % (repr_strength(self.strength), self.weight, self.expression)
 
 class EditConstraint(AbstractConstraint):
     def __init__(self, variable, strength=STRONG, weight=1.0):
@@ -428,7 +439,7 @@ class EditConstraint(AbstractConstraint):
         self.is_edit_constraint = True
 
     def __repr__(self):
-        return u'edit:%s' % super(EditConstraint, self).__repr__()
+        return 'edit:%s' % super(EditConstraint, self).__repr__()
 
 
 class StayConstraint(AbstractConstraint):
@@ -439,7 +450,7 @@ class StayConstraint(AbstractConstraint):
         self.is_stay_constraint=True
 
     def __repr__(self):
-        return u'stay:%s' % super(StayConstraint, self).__repr__()
+        return 'stay:%s' % super(StayConstraint, self).__repr__()
 
 
 class Constraint(AbstractConstraint):
