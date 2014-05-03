@@ -1,9 +1,7 @@
-from .constraint import Equation, Inequality, StayConstraint, EditConstraint
-from .expression import Expression
+from .constraint import Equation, Inequality
 from .simplex_solver import SimplexSolver
 from .strength import REQUIRED, STRONG, MEDIUM, WEAK
 from .variable import Variable
-from .utils import approx_equal
 
 # Examples of valid version strings
 # NUM_VERSION = (0, 1, 3, 'dev')

@@ -546,7 +546,7 @@ class EndToEndTestCase(TestCase):
         solver = SimplexSolver()
 
         class Point(object):
-            def __init__(self, x, y, identifier):
+            def __init__(self, identifier, x, y):
                 self.x = Variable('x' + identifier, x)
                 self.y = Variable('y' + identifier, y)
 
@@ -557,22 +557,22 @@ class EndToEndTestCase(TestCase):
                 return self.x.value == other[0] and self.y.value == other[1]
 
         points = [
-            Point(10, 10, '0'),
-            Point(10, 200, '1'),
-            Point(200, 200, '2'),
-            Point(200, 10, '3'),
+            Point('0', 10, 10),
+            Point('1', 10, 200),
+            Point('2', 200, 200),
+            Point('3', 200, 10),
 
-            Point(0, 0, 'm0'),
-            Point(0, 0, 'm1'),
-            Point(0, 0, 'm2'),
-            Point(0, 0, 'm3'),
+            Point('m0', 0, 0),
+            Point('m1', 0, 0),
+            Point('m2', 0, 0),
+            Point('m3', 0, 0),
         ]
         midpoints = points[4:]
 
         # Add point stays
         weight = 1.0
         multiplier = 2.0
-        for i, point in enumerate(points[:4]):
+        for point in points[:4]:
             solver.add_stay(point.x, WEAK, weight)
             solver.add_stay(point.y, WEAK, weight)
             weight = weight * multiplier
@@ -602,12 +602,22 @@ class EndToEndTestCase(TestCase):
         solver.add_constraint(Inequality(cle, Inequality.LEQ, points[2].y))
 
         for point in points:
-            solver.add_constraint(Inequality(point.x, Inequality.GEQ, 10))
-
-            solver.add_constraint(Inequality(point.y, Inequality.GEQ, 10))
+            solver.add_constraint(Inequality(point.x, Inequality.GEQ, 0))
+            solver.add_constraint(Inequality(point.y, Inequality.GEQ, 0))
 
             solver.add_constraint(Inequality(point.x, Inequality.LEQ, 500))
             solver.add_constraint(Inequality(point.y, Inequality.LEQ, 500))
+
+        # Check the initial answers
+
+        self.assertEqual(points[0], (10.0, 10.0))
+        self.assertEqual(points[1], (10.0, 200.0))
+        self.assertEqual(points[2], (200.0, 200.0))
+        self.assertEqual(points[3], (200.0, 10.0))
+        self.assertEqual(points[4], (10.0, 105.0))
+        self.assertEqual(points[5], (105.0, 200.0))
+        self.assertEqual(points[6], (200.0, 105.0))
+        self.assertEqual(points[7], (105.0, 10.0))
 
         # Now move point 2 to a new location
 
@@ -729,7 +739,6 @@ class EndToEndTestCase(TestCase):
         self.assertAlmostEqual(b2.left.value, 263.0)
         self.assertAlmostEqual(b2.width.value, 113.0)
         self.assertAlmostEqual(right_limit.value, 426.0)
-        solver.remove_constraint(stay)
 
         # The window is 500 pixels wide.
         right_limit.value = 500

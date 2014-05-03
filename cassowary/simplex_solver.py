@@ -144,7 +144,7 @@ class SimplexSolver(Tableau):
 
     def add_edit_var(self, v, strength=STRONG):
         # print "add_edit_var", v, strength
-        self.add_constraint(EditConstraint(v, strength))
+        return self.add_constraint(EditConstraint(v, strength))
 
     def remove_edit_var(self, v):
         self.remove_constraint(self.edit_var_map[v].constraint)
@@ -176,7 +176,7 @@ class SimplexSolver(Tableau):
             raise InternalError('Constraint not found during internal removal')
 
     def add_stay(self, v, strength=WEAK, weight=1.0):
-        self.add_constraint(StayConstraint(v, strength, weight))
+        return self.add_constraint(StayConstraint(v, strength, weight))
 
     def remove_constraint(self, cn):
         # print "removeConstraint", cn
@@ -513,6 +513,8 @@ class SimplexSolver(Tableau):
         while True:
             objective_coeff = 0.0
 
+            # Not convinced the sort is correct here; but test suite
+            # doesn't pass reliably without it.
             for v, c in sorted(z_row.terms.items()):
                 # print 'term check', v, v.is_pivotable, c
                 if v.is_pivotable and c < objective_coeff:

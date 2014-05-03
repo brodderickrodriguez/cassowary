@@ -1,7 +1,6 @@
 Contributing to Cassowary
 =========================
 
-
 If you experience problems with Cassowary, `log them on GitHub`_. If you want
 to contribute code, please `fork the code`_ and `submit a pull request`_.
 

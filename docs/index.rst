@@ -14,12 +14,23 @@ In your virtualenv, install Cassowary::
 
     $ pip install cassowary
 
-Then, in a Python shell, you can create and solve constraint systems.
+Then, in your Python code, you can create and solve constraint systems. See
+:ref:`the examples <topics/solvers>` for details on what this looks like in
+practice
 
 Documentation
 -------------
 
-Documentation for Cassowary can be found on `Read The Docs`_.
+.. toctree::
+   :maxdepth: 2
+
+   topics/theory
+   topics/examples
+   reference/reference
+   internals/contributing
+   internals/roadmap
+   internals/releases
+
 
 Community
 ---------
@@ -46,3 +57,11 @@ want to contribute code, please `fork the code`_ and `submit a pull request`_.
 .. _log them on Github: https://github.com/pybee/cassowary/issues
 .. _fork the code: https://github.com/pybee/cassowary
 .. _submit a pull request: https://github.com/pybee/cassowary/pulls
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
+
