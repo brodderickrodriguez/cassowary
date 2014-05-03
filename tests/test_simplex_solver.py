@@ -1,6 +1,9 @@
 from unittest import TestCase
 
-from cassowary import Variable, Constraint, SimplexSolver, STRONG, REQUIRED
+from cassowary import Variable, SimplexSolver, STRONG, REQUIRED
+
+# internals
+from cassowary.expression import Constraint
 
 
 class SimplexSolverTestCase(TestCase):

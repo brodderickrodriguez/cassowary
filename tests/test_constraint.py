@@ -1,9 +1,9 @@
 from unittest import TestCase
 
-from cassowary import Variable, Constraint, SimplexSolver, STRONG, WEAK
+from cassowary import Variable, SimplexSolver, STRONG, WEAK
 
 # Internals
-from cassowary.expression import Expression
+from cassowary.expression import Expression, Constraint
 from cassowary.utils import approx_equal
 
 

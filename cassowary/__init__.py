@@ -1,8 +1,7 @@
-from .constraint import Constraint
+from .expression import Variable
 from .error import RequiredFailure, ConstraintNotFound, InternalError
 from .simplex_solver import SimplexSolver
-from .strength import REQUIRED, STRONG, MEDIUM, WEAK
-from .variable import Variable
+from .utils import REQUIRED, STRONG, MEDIUM, WEAK
 
 # Examples of valid version strings
 # NUM_VERSION = (0, 1, 3, 'dev')

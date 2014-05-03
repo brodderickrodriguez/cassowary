@@ -1,9 +1,10 @@
 import random
 from unittest import TestCase
 
-from cassowary import Constraint, RequiredFailure, SimplexSolver, STRONG, WEAK, MEDIUM, REQUIRED, Variable
+from cassowary import RequiredFailure, SimplexSolver, STRONG, WEAK, MEDIUM, REQUIRED, Variable
 
 # Internals
+from cassowary.expression import Constraint
 from cassowary.utils import approx_equal
 
 
@@ -720,3 +721,41 @@ class EndToEndTestCase(TestCase):
         self.assertAlmostEqual(b2.width.value, 113.0)
         self.assertAlmostEqual(right_limit.value, 600.0)
         solver.remove_constraint(stay)
+
+    def test_paper_example(self):
+
+        solver = SimplexSolver()
+
+        left = Variable('left')
+        middle = Variable('middle')
+        right = Variable('right')
+
+        solver.add_constraint(middle == (left + right) / 2)
+        solver.add_constraint(right == left + 10)
+        solver.add_constraint(right <= 100)
+        solver.add_constraint(left >= 0)
+
+        # Check that all the required constraints are true:
+        self.assertAlmostEqual((left.value + right.value) / 2, middle.value)
+        self.assertAlmostEqual(right.value, left.value + 10)
+        self.assertGreaterEqual(left.value, 0)
+        self.assertLessEqual(right.value, 100)
+
+        # Set the middle value to a stay
+        middle.value = 45.0
+        solver.add_stay(middle)
+
+        # Check that all the required constraints are true:
+        self.assertAlmostEqual((left.value + right.value) / 2, middle.value)
+        self.assertAlmostEqual(right.value, left.value + 10)
+        self.assertGreaterEqual(left.value, 0)
+        self.assertLessEqual(right.value, 100)
+
+        print left.value, middle.value, right.value
+
+        # But more than that - since we gave a position for middle, we know
+        # where all the points should be.
+
+        self.assertAlmostEqual(left.value, 40)
+        self.assertAlmostEqual(middle.value, 45)
+        self.assertAlmostEqual(right.value, 50)

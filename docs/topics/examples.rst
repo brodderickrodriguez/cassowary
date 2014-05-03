@@ -94,21 +94,17 @@ that they will be added as ``REQUIRED`` constraints.
 Next, lets add some constraints to ensure that the left side of the quadrilateral
 stays on the left, and the top stays on top::
 
-    cle = points[0].x + 20
-    solver.add_constraint(cle <= points[2].x)
-    solver.add_constraint(cle <= points[3].x)
+    solver.add_constraint(points[0].x + 20 <= points[2].x)
+    solver.add_constraint(points[0].x + 20 <= points[3].x)
 
-    cle = points[1].x + 20
-    solver.add_constraint(cle <= points[2].x)
-    solver.add_constraint(cle <= points[3].x)
+    solver.add_constraint(points[1].x + 20 <= points[2].x)
+    solver.add_constraint(points[1].x + 20 <= points[3].x)
 
-    cle = points[0].y + 20
-    solver.add_constraint(cle <= points[1].y)
-    solver.add_constraint(cle <= points[2].y)
+    solver.add_constraint(points[0].y + 20 <= points[1].y)
+    solver.add_constraint(points[0].y + 20 <= points[2].y)
 
-    cle = points[3].y + 20
-    solver.add_constraint(cle <= points[1].y)
-    solver.add_constraint(cle <= points[2].y)
+    solver.add_constraint(points[3].y + 20 <= points[1].y)
+    solver.add_constraint(points[3].y + 20 <= points[2].y)
 
 Each of these constraints is posed as an :class:`Constraint`. For example, the first
 expression describes a point 20 pixels to the right of the x coordinate of the top
@@ -182,10 +178,26 @@ there's lots of code required to make a full GUI toolkit work, the layout
 problem is a relatively simple case of solving constraints regarding the size
 and position of widgets in a window.
 
-In this example, we'll show a set of constraints used to determine the placement
-of a pair of buttons in a GUI. To simplify the problem, we'll only worry about
-the X coordinate; expanding the implementation to include the Y coordinate is
-a relatively simple exercise left for the reader.
+In this example, we'll show a set of constraints used to determine the
+placement of a pair of buttons in a GUI. To simplify the problem, we'll only
+worry about the X coordinate; expanding the implementation to include the Y
+coordinate is a relatively simple exercise left for the reader.
+
+When laying out a GUI, widgets have a width; however, widgets can also change
+size. To accomodate this, a widget has two size constraints in each dimension:
+a minimum size, and a preferred size. The miniumum size is an ``REQUIRED``
+constraint that must be met; the preferred size is a ``STRONG`` constraint
+that the solver should try to accomodate, but may break if necessary.
+
+The GUI also needs to be concerned about the size of the window that is being
+laid out. The size of the window can be handled in two ways:
+
+* a ``REQUIRED`` constraint -- i.e., this *is* the size of the window;
+  show me how to lay out the widgets; or
+
+* a ``WEAK`` constraint -- i.e., come up with a value for the window size that
+  accomodates all the other widget constraints. This is the interpretation used
+  to determine an initial window size.
 
 As with the Quadrilateral demo, we start by creating the solver, and creating
 a storage mechanism to hold details about buttons::
