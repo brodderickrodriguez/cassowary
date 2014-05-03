@@ -14,7 +14,7 @@ from .utils import REQUIRED, STRONG, MEDIUM, WEAK
 # NUM_VERSION = (0, 1, 3, ('b', 1), 'dev')
 # NUM_VERSION = (0, 1, 3)
 
-NUM_VERSION = (0, 0, 0)
+NUM_VERSION = (0, 5, 0)
 
 
 def get_git_changeset():
