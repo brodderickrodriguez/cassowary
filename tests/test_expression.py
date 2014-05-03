@@ -1,10 +1,10 @@
 from unittest import TestCase
 
-from cassowary.constraint import Equation, Inequality, StayConstraint
-from cassowary.error import RequiredFailure, InternalError
+from cassowary import InternalError, Variable
+
+# Internals
 from cassowary.expression import Expression
-from cassowary.strength import STRONG, WEAK, MEDIUM
-from cassowary.variable import Variable, SlackVariable
+from cassowary.variable import SlackVariable
 
 
 class ExpressionTestCase(TestCase):

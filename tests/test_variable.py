@@ -1,6 +1,9 @@
 from unittest import TestCase
 
-from cassowary.variable import Variable, DummyVariable, SlackVariable, ObjectiveVariable
+from cassowary import Variable
+
+# Internals
+from cassowary.variable import DummyVariable, SlackVariable, ObjectiveVariable
 
 
 class VariableTestCase(TestCase):

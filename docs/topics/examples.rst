@@ -19,7 +19,7 @@ constraints.
 
 Firstly, we set up the solver system itself::
 
-    from cassowary import SimplexSolver, Variable, Expression, Inequality, Equation
+    from cassowary import SimplexSolver, Variable, Constraint
     solver = SimplexSolver()
 
 Then, we set up a convenience class for holding information about points
@@ -73,19 +73,19 @@ so on::
 
 Now we can set up the constraints to define where the midpoints fall. By
 definition, each midpoint **must** fall exactly halfway between two points
-that form a line; so, that's exactly what we describe - an :class:`Expression`
-that computes the position of the midpoint. This :class:`Expression` is then
-added to an :class:`Equation`, describing that the midpoint must equal the
-value of the expression. The :class:`Equation` is then added as a constraint
-to the solver system::
+that form a line, and that's exactly what we describe - an expression that
+computes the position of the midpoint. This expression is used to construct a
+:class:`Constraint`, describing that the value of the midpoint must equal the
+value of the expression. The :class:`Constraint` is then added to the solver
+system::
 
     for start, end in [(0, 1), (1, 2), (2, 3), (3, 0)]:
-        cle = (Expression(variable=points[start].x) + points[end].x) / 2
-        cleq = Equation(midpoints[start].x, cle)
+        cle = (points[start].x + points[end].x) / 2
+        cleq = Constraint(midpoints[start].x, Constraint.EQ, cle)
         solver.add_constraint(cleq)
 
-        cle = (Expression(variable=points[start].y) + points[end].y) / 2
-        cleq = Equation(midpoints[start].y, cle)
+        cle = (points[start].y + points[end].y) / 2
+        cleq = Constraint(midpoints[start].y, Constraint.EQ, cle)
         solver.add_constraint(cleq)
 
 When we added these constraints, we didn't provided any arguments - that means
@@ -94,25 +94,25 @@ that they will be added as ``REQUIRED`` constraints.
 Next, lets add some constraints to ensure that the left side of the quadrilateral
 stays on the left, and the top stays on top::
 
-    cle = Expression(variable=points[0].x) + Expression(constant=20)
-    solver.add_constraint(Inequality(cle, Inequality.LEQ, points[2].x))
-    solver.add_constraint(Inequality(cle, Inequality.LEQ, points[3].x))
+    cle = points[0].x + 20
+    solver.add_constraint(Constraint(cle, Constraint.LEQ, points[2].x))
+    solver.add_constraint(Constraint(cle, Constraint.LEQ, points[3].x))
 
-    cle = Expression(variable=points[1].x) + Expression(constant=20)
-    solver.add_constraint(Inequality(cle, Inequality.LEQ, points[2].x))
-    solver.add_constraint(Inequality(cle, Inequality.LEQ, points[3].x))
+    cle = points[1].x + 20
+    solver.add_constraint(Constraint(cle, Constraint.LEQ, points[2].x))
+    solver.add_constraint(Constraint(cle, Constraint.LEQ, points[3].x))
 
-    cle = Expression(variable=points[0].y) + Expression(constant=20)
-    solver.add_constraint(Inequality(cle, Inequality.LEQ, points[1].y))
-    solver.add_constraint(Inequality(cle, Inequality.LEQ, points[2].y))
+    cle = points[0].y + 20
+    solver.add_constraint(Constraint(cle, Constraint.LEQ, points[1].y))
+    solver.add_constraint(Constraint(cle, Constraint.LEQ, points[2].y))
 
-    cle = Expression(variable=points[3].y) + Expression(constant=20)
-    solver.add_constraint(Inequality(cle, Inequality.LEQ, points[1].y))
-    solver.add_constraint(Inequality(cle, Inequality.LEQ, points[2].y))
+    cle = points[3].y + 20
+    solver.add_constraint(Constraint(cle, Constraint.LEQ, points[1].y))
+    solver.add_constraint(Constraint(cle, Constraint.LEQ, points[2].y))
 
-Each of these constraints is posed as an :class:`Inequality`. For example, the first
+Each of these constraints is posed as an :class:`Constraint`. For example, the first
 expression describes a point 20 pixels to the right of the x coordinate of the top
-left point. This :class:`Inequality` is then added as a constraint on the x coordinate
+left point. This :class:`Constraint` is then added as a constraint on the x coordinate
 of the bottom right (point 2) and top right (point 3) corners - the x coordinate of these
 points must be at least 20 pixels greater than the x coordinate of the top left corner
 (point 0).
@@ -121,11 +121,11 @@ Lastly, we set the overall constraints -- the constraints that limit how large o
 2D canvas is. We'll constraint the canvas to be 500x500 pixels::
 
     for point in points:
-        solver.add_constraint(Inequality(point.x, Inequality.GEQ, 0))
-        solver.add_constraint(Inequality(point.y, Inequality.GEQ, 0))
+        solver.add_constraint(Constraint(point.x, Constraint.GEQ, 0))
+        solver.add_constraint(Constraint(point.y, Constraint.GEQ, 0))
 
-        solver.add_constraint(Inequality(point.x, Inequality.LEQ, 500))
-        solver.add_constraint(Inequality(point.y, Inequality.LEQ, 500))
+        solver.add_constraint(Constraint(point.x, Constraint.LEQ, 500))
+        solver.add_constraint(Constraint(point.y, Constraint.LEQ, 500))
 
 This gives us a fully formed constraint system. Now we can use it to answer
 layout questions. The most obvious initial question -- where are the midpoints?
@@ -190,7 +190,7 @@ a relatively simple exercise left for the reader.
 As with the Quadrilateral demo, we start by creating the solver, and creating
 a storage mechanism to hold details about buttons::
 
-    from cassowary import SimplexSolver, Variable, Expression, Inequality, Equation
+    from cassowary import SimplexSolver, Variable, Constraint
 
     solver = SimplexSolver()
 
@@ -221,75 +221,30 @@ the widgets it contains, so the right limit is a ``WEAK`` constraint.
 Now we can define the constraints on the button layouts::
 
     # The two buttons are the same width
-    solver.add_constraint(
-        Equation(
-            Expression(variable=b1.width),
-            Expression(variable=b2.width),
-        )
-    )
+    solver.add_constraint(Constraint(b1.width, Constraint.EQ, b2.width))
 
     # Button1 starts 50 from the left margin.
-    solver.add_constraint(
-        Equation(
-            Expression(variable=b1.left),
-            Expression(variable=left_limit) + 50
-        )
-    )
+    solver.add_constraint(Constraint(b1.left, Constraint.EQ, left_limit + 50))
 
     # Button2 ends 50 from the right margin
-    solver.add_constraint(
-        Equation(
-            Expression(variable=left_limit) + Expression(variable=right_limit),
-            Expression(variable=b2.left) + Expression(variable=b2.width) + 50,
-        ),
-    )
+    solver.add_constraint(Constraint(left_limit + right_limit, Constraint.EQ, b2.left + b2.width + 50))
 
     # Button2 starts at least 100 from the end of Button1. This is the
     # "elastic" constraint in the system that will absorb extra space
     # in the layout.
-    solver.add_constraint(
-        Inequality(
-            Expression(variable=b2.left),
-            Inequality.GEQ,
-            Expression(variable=b1.left) + Expression(variable=b1.width) + 100,
-        )
-    )
+    solver.add_constraint(Constraint(b2.left, Constraint.GEQ, b1.left + b1.width + 100))
 
     # Button1 has a minimum width of 87
-    solver.add_constraint(
-        Inequality(
-            Expression(variable=b1.width),
-            Inequality.GEQ,
-            87,
-        )
-    )
+    solver.add_constraint(Constraint(b1.width, Constraint.GEQ, 87))
 
     # Button1's preferred width is 87
-    solver.add_constraint(
-        Equation(
-            Expression(variable=b1.width),
-            87,
-            strength=STRONG
-        )
-    )
+    solver.add_constraint(Constraint(b1.width, Constraint.EQ, 87, strength=STRONG))
 
     # Button2's minimum width is 113
-    solver.add_constraint(
-        Inequality(
-            Expression(variable=b2.width),
-            Inequality.GEQ,
-            113,
-        )
-    )
+    solver.add_constraint(Constraint(b2.width, Constraint.GEQ, 113))
 
     # Button2's preferred width is 113
-    solver.add_constraint(
-        Equation(
-            Expression(variable=b2.width),
-            113,
-            strength=STRONG
-        )
-    )
+    solver.add_constraint(Constraint(b2.width, Constraint.EQ, 113, strength=STRONG))
 
 Since we haven't imposed a hard constraint on the right hand side, the constraint
 system will give us the smallest window that will satisfy these constraints::
@@ -307,8 +262,7 @@ wide. However, if the user makes the window larger, we can still lay out widgets
 We impose a new ``REQUIRED`` constraint with the size of the window::
 
     right_limit.value = 500
-    right_limit_stay = StayConstraint(right_limit, REQUIRED)
-    solver.add_constraint(right_limit_stay)
+    right_limit_stay = solver.add_constraint(right_limit, strength=REQUIRED)
 
     >>> print b1
     (x=50.0, width=113.0)
@@ -328,7 +282,7 @@ a new limit::
     solver.remove_constraint(right_limit_stay)
 
     right_limit.value = 475
-    right_limit_stay = StayConstraint(right_limit, REQUIRED)
+    right_limit_stay = solver.add_constraint(right_limit, strength=REQUIRED)
     solver.add_constraint(right_limit_stay)
 
     >>> print b1

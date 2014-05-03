@@ -1,13 +1,10 @@
 import random
 from unittest import TestCase
 
-from cassowary.constraint import Equation, Inequality, StayConstraint
-from cassowary.error import RequiredFailure
-from cassowary.expression import Expression
-from cassowary.simplex_solver import SimplexSolver
-from cassowary.strength import STRONG, WEAK, MEDIUM, REQUIRED
+from cassowary import Constraint, RequiredFailure, SimplexSolver, STRONG, WEAK, MEDIUM, REQUIRED, Variable
+
+# Internals
 from cassowary.utils import approx_equal
-from cassowary.variable import Variable
 
 
 class EndToEndTestCase(TestCase):
@@ -16,7 +13,7 @@ class EndToEndTestCase(TestCase):
 
         x = Variable('x', 167)
         y = Variable('y', 2)
-        eq = Equation(x, Expression(y))
+        eq = Constraint(x, Constraint.EQ, y)
 
         solver.add_constraint(eq)
         self.assertAlmostEqual(x.value, y.value)
@@ -38,7 +35,7 @@ class EndToEndTestCase(TestCase):
         solver = SimplexSolver()
 
         x = Variable('x', 10)
-        ieq = Inequality(x, Inequality.GEQ, 100)
+        ieq = Constraint(x, Constraint.GEQ, 100)
         solver.add_constraint(ieq)
 
         self.assertAlmostEqual(x.value, 100)
@@ -47,7 +44,7 @@ class EndToEndTestCase(TestCase):
         solver = SimplexSolver()
 
         x = Variable('x', 100)
-        ieq = Inequality(x, Inequality.LEQ, 10)
+        ieq = Constraint(x, Constraint.LEQ, 10)
         solver.add_constraint(ieq)
 
         self.assertAlmostEqual(x.value, 10)
@@ -56,7 +53,7 @@ class EndToEndTestCase(TestCase):
         solver = SimplexSolver()
 
         x = Variable('x', 10)
-        eq = Equation(100, x)
+        eq = Constraint(100, Constraint.EQ, x)
         solver.add_constraint(eq)
 
         self.assertAlmostEqual(x.value, 100)
@@ -66,7 +63,7 @@ class EndToEndTestCase(TestCase):
         solver = SimplexSolver()
 
         x = Variable('x', 100)
-        ieq = Inequality(10, Inequality.GEQ, x)
+        ieq = Constraint(10, Constraint.GEQ, x)
         solver.add_constraint(ieq)
 
         self.assertAlmostEqual(x.value, 10)
@@ -76,7 +73,7 @@ class EndToEndTestCase(TestCase):
         solver = SimplexSolver()
 
         x = Variable('x', 10)
-        ieq = Inequality(100, Inequality.LEQ, x)
+        ieq = Constraint(100, Constraint.LEQ, x)
         solver.add_constraint(ieq)
 
         self.assertAlmostEqual(x.value, 100)
@@ -91,9 +88,9 @@ class EndToEndTestCase(TestCase):
         # width = 10
         width = Variable('width', 10)
         # right = x + width
-        right = Expression(x) + width
+        right = x + width
         # right >= 100
-        ieq = Inequality(right, Inequality.GEQ, 100)
+        ieq = Constraint(right, Constraint.GEQ, 100)
         solver.add_stay(width)
         solver.add_constraint(ieq)
 
@@ -107,8 +104,8 @@ class EndToEndTestCase(TestCase):
 
         x = Variable('x', 10)
         width = Variable('width', 10)
-        right = Expression(x) + width
-        ieq = Inequality(100, Inequality.LEQ, right)
+        right = x + width
+        ieq = Constraint(100, Constraint.LEQ, right)
 
         solver.add_stay(width)
         solver.add_constraint(ieq)
@@ -125,9 +122,9 @@ class EndToEndTestCase(TestCase):
         width = Variable('width', 10)
         rightMin = Variable('rightMin', 100)
 
-        right = Expression(x) + width
+        right = x + width
 
-        eq = Equation(right, rightMin)
+        eq = Constraint(right, Constraint.EQ, rightMin)
 
         solver.add_stay(width)
         solver.add_stay(rightMin)
@@ -145,9 +142,9 @@ class EndToEndTestCase(TestCase):
         width = Variable('width', 10)
         rightMin = Variable('rightMin', 100)
 
-        right = Expression(x) + width
+        right = x + width
 
-        ieq = Inequality(right, Inequality.GEQ, rightMin)
+        ieq = Constraint(right, Constraint.GEQ, rightMin)
 
         solver.add_stay(width)
         solver.add_stay(rightMin)
@@ -165,9 +162,9 @@ class EndToEndTestCase(TestCase):
         width = Variable('width', 10)
         rightMin = Variable('rightMin', 100)
 
-        right = Expression(x) + width
+        right = x + width
 
-        ieq = Inequality(rightMin, Inequality.LEQ, right)
+        ieq = Constraint(rightMin, Constraint.LEQ, right)
 
         solver.add_stay(width)
         solver.add_stay(rightMin)
@@ -183,13 +180,13 @@ class EndToEndTestCase(TestCase):
 
         x1 = Variable('x1', 10)
         width1 = Variable('width1', 10)
-        right1 = Expression(x1) + width1
+        right1 = x1 + width1
 
         x2 = Variable('x2', 100)
         width2 = Variable('width2', 10)
-        right2 = Expression(x2) + width2
+        right2 = x2 + width2
 
-        eq = Equation(right1, right2)
+        eq = Constraint(right1, Constraint.EQ, right2)
 
         solver.add_stay(width1)
         solver.add_stay(width2)
@@ -208,13 +205,13 @@ class EndToEndTestCase(TestCase):
 
         x1 = Variable('x1', 10)
         width1 = Variable('width1', 10)
-        right1 = Expression(x1) + width1
+        right1 = x1 + width1
 
         x2 = Variable('x2', 100)
         width2 = Variable('width2', 10)
-        right2 = Expression(x2) + width2
+        right2 = x2 + width2
 
-        ieq = Inequality(right1, Inequality.GEQ, right2)
+        ieq = Constraint(right1, Constraint.GEQ, right2)
 
         solver.add_stay(width1)
         solver.add_stay(width2)
@@ -230,13 +227,13 @@ class EndToEndTestCase(TestCase):
 
         x1 = Variable('x1', 10)
         width1 = Variable('width1', 10)
-        right1 = Expression(x1) + width1
+        right1 = x1 + width1
 
         x2 = Variable('x2', 100)
         width2 = Variable('width2', 10)
-        right2 = Expression(x2) + width2
+        right2 = x2 + width2
 
-        ieq = Inequality(right2, Inequality.LEQ, right1)
+        ieq = Constraint(right2, Constraint.LEQ, right1)
 
         solver.add_stay(width1)
         solver.add_stay(width2)
@@ -248,11 +245,11 @@ class EndToEndTestCase(TestCase):
     def test_delete1(self):
         solver = SimplexSolver()
         x = Variable('x')
-        cbl = Equation(x, 100, WEAK)
+        cbl = Constraint(x, Constraint.EQ, 100, WEAK)
         solver.add_constraint(cbl)
 
-        c10 = Inequality(x, Inequality.LEQ, 10)
-        c20 = Inequality(x, Inequality.LEQ, 20)
+        c10 = Constraint(x, Constraint.LEQ, 10)
+        c20 = Constraint(x, Constraint.LEQ, 20)
         solver.add_constraint(c10)
         solver.add_constraint(c20)
         self.assertAlmostEqual(x.value, 10)
@@ -263,7 +260,7 @@ class EndToEndTestCase(TestCase):
         solver.remove_constraint(c20)
         self.assertAlmostEqual(x.value, 100)
 
-        c10again = Inequality(x, Inequality.LEQ, 10)
+        c10again = Constraint(x, Constraint.LEQ, 10)
         solver.add_constraint(c10)
         solver.add_constraint(c10again)
         self.assertAlmostEqual(x.value, 10)
@@ -279,10 +276,10 @@ class EndToEndTestCase(TestCase):
         x = Variable('x')
         y = Variable('y')
 
-        solver.add_constraint(Equation(x, 100, WEAK))
-        solver.add_constraint(Equation(y, 120, STRONG))
-        c10 = Inequality(x, Inequality.LEQ, 10)
-        c20 = Inequality(x, Inequality.LEQ, 20)
+        solver.add_constraint(Constraint(x, Constraint.EQ, 100, WEAK))
+        solver.add_constraint(Constraint(y, Constraint.EQ, 120, STRONG))
+        c10 = Constraint(x, Constraint.LEQ, 10)
+        c20 = Constraint(x, Constraint.LEQ, 20)
         solver.add_constraint(c10)
         solver.add_constraint(c20)
         self.assertAlmostEqual(x.value, 10)
@@ -292,7 +289,7 @@ class EndToEndTestCase(TestCase):
         self.assertAlmostEqual(x.value, 20)
         self.assertAlmostEqual(y.value, 120)
 
-        cxy = Equation(x * 2, y)
+        cxy = Constraint(x * 2, Constraint.EQ, y)
         solver.add_constraint(cxy)
         self.assertAlmostEqual(x.value, 20)
         self.assertAlmostEqual(y.value, 40)
@@ -310,10 +307,10 @@ class EndToEndTestCase(TestCase):
         x = Variable('x')
         y = Variable('y')
 
-        solver.add_constraint(Inequality(x, Inequality.LEQ, y))
-        solver.add_constraint(Equation(y, x + 3))
-        solver.add_constraint(Equation(x, 10, WEAK))
-        solver.add_constraint(Equation(y, 10, WEAK))
+        solver.add_constraint(Constraint(x, Constraint.LEQ, y))
+        solver.add_constraint(Constraint(y, Constraint.EQ, x + 3))
+        solver.add_constraint(Constraint(x, Constraint.EQ, 10, WEAK))
+        solver.add_constraint(Constraint(y, Constraint.EQ, 10, WEAK))
 
         self.assertTrue(
             (approx_equal(x.value, 10) and approx_equal(y.value, 13)) or
@@ -324,18 +321,18 @@ class EndToEndTestCase(TestCase):
         solver = SimplexSolver()
         x = Variable('x')
         # x = 10
-        solver.add_constraint(Equation(x, 10))
+        solver.add_constraint(Constraint(x, Constraint.EQ, 10))
         # x = 5
         with self.assertRaises(RequiredFailure):
-            solver.add_constraint(Equation(x, 5))
+            solver.add_constraint(Constraint(x, Constraint.EQ, 5))
 
     def test_inconsistent2(self):
         solver = SimplexSolver()
         x = Variable('x')
-        solver.add_constraint(Inequality(x, Inequality.GEQ, 10))
+        solver.add_constraint(Constraint(x, Constraint.GEQ, 10))
 
         with self.assertRaises(RequiredFailure):
-            solver.add_constraint(Inequality(x, Inequality.LEQ, 5))
+            solver.add_constraint(Constraint(x, Constraint.LEQ, 5))
 
     def test_inconsistent3(self):
         solver = SimplexSolver()
@@ -343,26 +340,26 @@ class EndToEndTestCase(TestCase):
         x = Variable('x')
         y = Variable('y')
         z = Variable('z')
-        solver.add_constraint(Inequality(w, Inequality.GEQ, 10))
-        solver.add_constraint(Inequality(x, Inequality.GEQ, w))
-        solver.add_constraint(Inequality(y, Inequality.GEQ, x))
-        solver.add_constraint(Inequality(z, Inequality.GEQ, y))
-        solver.add_constraint(Inequality(z, Inequality.GEQ, 8))
+        solver.add_constraint(Constraint(w, Constraint.GEQ, 10))
+        solver.add_constraint(Constraint(x, Constraint.GEQ, w))
+        solver.add_constraint(Constraint(y, Constraint.GEQ, x))
+        solver.add_constraint(Constraint(z, Constraint.GEQ, y))
+        solver.add_constraint(Constraint(z, Constraint.GEQ, 8))
 
         with self.assertRaises(RequiredFailure):
-            solver.add_constraint(Inequality(z, Inequality.LEQ, 4))
+            solver.add_constraint(Constraint(z, Constraint.LEQ, 4))
 
     def test_inconsistent4(self):
         solver = SimplexSolver()
         x = Variable('x')
         y = Variable('y')
         # x = 10
-        solver.add_constraint(Equation(x, 10))
+        solver.add_constraint(Constraint(x, Constraint.EQ, 10))
         # x = y
-        solver.add_constraint(Equation(x, y))
+        solver.add_constraint(Constraint(x, Constraint.EQ, y))
         # y = 5. Should fail.
         with self.assertRaises(RequiredFailure):
-            solver.add_constraint(Equation(y, 5))
+            solver.add_constraint(Constraint(y, Constraint.EQ, 5))
 
     def test_multiedit1(self):
         # This test stresses the edit session stack. begin_edit() starts a new
@@ -482,15 +479,15 @@ class EndToEndTestCase(TestCase):
         iw = Variable('window_innerWidth', random.randrange(MIN, MAX))
         ih = Variable('window_innerHeight', random.randrange(MIN, MAX))
 
-        solver.add_constraint(Equation(width, iw, strength=STRONG, weight=0.0))
-        solver.add_constraint(Equation(height, ih, strength=STRONG, weight=0.0))
-        solver.add_constraint(Equation(top, 0, strength=WEAK, weight=0.0))
-        solver.add_constraint(Equation(left, 0, strength=WEAK, weight=0.0))
-        solver.add_constraint(Equation(bottom, top + height, strength=MEDIUM, weight=0.0))
+        solver.add_constraint(Constraint(width, Constraint.EQ, iw, strength=STRONG, weight=0.0))
+        solver.add_constraint(Constraint(height, Constraint.EQ, ih, strength=STRONG, weight=0.0))
+        solver.add_constraint(Constraint(top, Constraint.EQ, 0, strength=WEAK, weight=0.0))
+        solver.add_constraint(Constraint(left, Constraint.EQ, 0, strength=WEAK, weight=0.0))
+        solver.add_constraint(Constraint(bottom, Constraint.EQ, top + height, strength=MEDIUM, weight=0.0))
         # Right is at least left + width
-        solver.add_constraint(Equation(right,  left + width, strength=MEDIUM, weight=0.0))
-        solver.add_constraint(StayConstraint(iw))
-        solver.add_constraint(StayConstraint(ih))
+        solver.add_constraint(Constraint(right, Constraint.EQ,  left + width, strength=MEDIUM, weight=0.0))
+        solver.add_stay(iw)
+        solver.add_stay(ih)
 
         # Propegate viewport size changes.
         for i in range(0, 30):
@@ -526,15 +523,15 @@ class EndToEndTestCase(TestCase):
         self.assertAlmostEqual(y.value, 200)
         self.assertAlmostEqual(z.value, 50)
 
-        solver.add_constraint(Equation(z, x, WEAK))
-        solver.add_constraint(Equation(x, 20, WEAK))
-        solver.add_constraint(Equation(y, 200, STRONG))
+        solver.add_constraint(Constraint(z, Constraint.EQ, x, WEAK))
+        solver.add_constraint(Constraint(x, Constraint.EQ, 20, WEAK))
+        solver.add_constraint(Constraint(y, Constraint.EQ, 200, STRONG))
 
         self.assertAlmostEqual(x.value,  20)
         self.assertAlmostEqual(y.value, 200)
         self.assertAlmostEqual(z.value,  20)
 
-        solver.add_constraint(Inequality(z + 150, Inequality.LEQ, y, MEDIUM))
+        solver.add_constraint(Constraint(z + 150, Constraint.LEQ, y, MEDIUM))
 
         self.assertAlmostEqual(x.value, 20)
         self.assertAlmostEqual(y.value, 200)
@@ -578,35 +575,35 @@ class EndToEndTestCase(TestCase):
             weight = weight * multiplier
 
         for start, end in [(0, 1), (1, 2), (2, 3), (3, 0)]:
-            cle = (Expression(variable=points[start].x) + points[end].x) / 2
-            cleq = Equation(midpoints[start].x, cle)
+            cle = (points[start].x + points[end].x) / 2
+            cleq = Constraint(midpoints[start].x, Constraint.EQ, cle)
             solver.add_constraint(cleq)
-            cle = (Expression(variable=points[start].y) + points[end].y) / 2
-            cleq = Equation(midpoints[start].y, cle)
+            cle = (points[start].y + points[end].y) / 2
+            cleq = Constraint(midpoints[start].y, Constraint.EQ, cle)
             solver.add_constraint(cleq)
 
-        cle = Expression(variable=points[0].x) + Expression(constant=20)
-        solver.add_constraint(Inequality(cle, Inequality.LEQ, points[2].x))
-        solver.add_constraint(Inequality(cle, Inequality.LEQ, points[3].x))
+        cle = points[0].x + 20
+        solver.add_constraint(Constraint(cle, Constraint.LEQ, points[2].x))
+        solver.add_constraint(Constraint(cle, Constraint.LEQ, points[3].x))
 
-        cle = Expression(variable=points[1].x) + Expression(constant=20)
-        solver.add_constraint(Inequality(cle, Inequality.LEQ, points[2].x))
-        solver.add_constraint(Inequality(cle, Inequality.LEQ, points[3].x))
+        cle = points[1].x + 20
+        solver.add_constraint(Constraint(cle, Constraint.LEQ, points[2].x))
+        solver.add_constraint(Constraint(cle, Constraint.LEQ, points[3].x))
 
-        cle = Expression(variable=points[0].y) + Expression(constant=20)
-        solver.add_constraint(Inequality(cle, Inequality.LEQ, points[1].y))
-        solver.add_constraint(Inequality(cle, Inequality.LEQ, points[2].y))
+        cle = points[0].y + 20
+        solver.add_constraint(Constraint(cle, Constraint.LEQ, points[1].y))
+        solver.add_constraint(Constraint(cle, Constraint.LEQ, points[2].y))
 
-        cle = Expression(variable=points[3].y) + Expression(constant=20)
-        solver.add_constraint(Inequality(cle, Inequality.LEQ, points[1].y))
-        solver.add_constraint(Inequality(cle, Inequality.LEQ, points[2].y))
+        cle = points[3].y + 20
+        solver.add_constraint(Constraint(cle, Constraint.LEQ, points[1].y))
+        solver.add_constraint(Constraint(cle, Constraint.LEQ, points[2].y))
 
         for point in points:
-            solver.add_constraint(Inequality(point.x, Inequality.GEQ, 0))
-            solver.add_constraint(Inequality(point.y, Inequality.GEQ, 0))
+            solver.add_constraint(Constraint(point.x, Constraint.GEQ, 0))
+            solver.add_constraint(Constraint(point.y, Constraint.GEQ, 0))
 
-            solver.add_constraint(Inequality(point.x, Inequality.LEQ, 500))
-            solver.add_constraint(Inequality(point.y, Inequality.LEQ, 500))
+            solver.add_constraint(Constraint(point.x, Constraint.LEQ, 500))
+            solver.add_constraint(Constraint(point.y, Constraint.LEQ, 500))
 
         # Check the initial answers
 
@@ -660,56 +657,59 @@ class EndToEndTestCase(TestCase):
         right_limit = Variable('width', 0)
 
         left_limit.value = 0
-        solver.add_constraint(StayConstraint(left_limit, REQUIRED))
-        stay = StayConstraint(right_limit, WEAK)
-        solver.add_constraint(stay)
+        solver.add_stay(left_limit, REQUIRED)
+        stay = solver.add_stay(right_limit, WEAK)
 
         # The two buttons are the same width
         solver.add_constraint(
-            Equation(
-                Expression(variable=b1.width),
-                Expression(variable=b2.width),
+            Constraint(
+                b1.width,
+                Constraint.EQ,
+                b2.width,
             )
         )
 
         # b1 starts 50 from the left margin.
         solver.add_constraint(
-            Equation(
-                Expression(variable=b1.left),
-                Expression(variable=left_limit) + 50
+            Constraint(
+                b1.left,
+                Constraint.EQ,
+                left_limit + 50
             )
         )
 
         # b2 ends 50 from the right margin
         solver.add_constraint(
-            Equation(
-                Expression(variable=left_limit) + Expression(variable=right_limit),
-                Expression(variable=b2.left) + Expression(variable=b2.width) + 50,
+            Constraint(
+                left_limit + right_limit,
+                Constraint.EQ,
+                b2.left + b2.width + 50,
             ),
         )
 
         # b2 starts at least 100 from the end of b1
         solver.add_constraint(
-            Inequality(
-                Expression(variable=b2.left),
-                Inequality.GEQ,
-                Expression(variable=b1.left) + Expression(variable=b1.width) + 100,
+            Constraint(
+                b2.left,
+                Constraint.GEQ,
+                b1.left + b1.width + 100,
             )
         )
 
         # b1 has a minimum width of 87
         solver.add_constraint(
-            Inequality(
-                Expression(variable=b1.width),
-                Inequality.GEQ,
+            Constraint(
+                b1.width,
+                Constraint.GEQ,
                 87,
             )
         )
 
         # b1's preferred width is 87
         solver.add_constraint(
-            Equation(
-                Expression(variable=b1.width),
+            Constraint(
+                b1.width,
+                Constraint.EQ,
                 87,
                 strength=STRONG
             )
@@ -717,17 +717,18 @@ class EndToEndTestCase(TestCase):
 
         # b2's minimum width is 113
         solver.add_constraint(
-            Inequality(
-                Expression(variable=b2.width),
-                Inequality.GEQ,
+            Constraint(
+                b2.width,
+                Constraint.GEQ,
                 113,
             )
         )
 
         # b2's preferred width is 113
         solver.add_constraint(
-            Equation(
-                Expression(variable=b2.width),
+            Constraint(
+                b2.width,
+                Constraint.EQ,
                 113,
                 strength=STRONG
             )
@@ -742,8 +743,7 @@ class EndToEndTestCase(TestCase):
 
         # The window is 500 pixels wide.
         right_limit.value = 500
-        stay = StayConstraint(right_limit, REQUIRED)
-        solver.add_constraint(stay)
+        stay = solver.add_stay(right_limit, REQUIRED)
         self.assertAlmostEqual(b1.left.value, 50.0)
         self.assertAlmostEqual(b1.width.value, 113.0)
         self.assertAlmostEqual(b2.left.value, 337.0)
@@ -753,8 +753,7 @@ class EndToEndTestCase(TestCase):
 
         # Expand to 700 pixels
         right_limit.value = 700
-        stay = StayConstraint(right_limit, REQUIRED)
-        solver.add_constraint(stay)
+        stay = solver.add_stay(right_limit, REQUIRED)
         self.assertAlmostEqual(b1.left.value, 50.0)
         self.assertAlmostEqual(b1.width.value, 113.0)
         self.assertAlmostEqual(b2.left.value, 537.0)
@@ -764,8 +763,7 @@ class EndToEndTestCase(TestCase):
 
         # Contract to 600
         right_limit.value = 600
-        stay = StayConstraint(right_limit, REQUIRED)
-        solver.add_constraint(stay)
+        stay = solver.add_stay(right_limit, REQUIRED)
         self.assertAlmostEqual(b1.left.value, 50.0)
         self.assertAlmostEqual(b1.width.value, 113.0)
         self.assertAlmostEqual(b2.left.value, 437.0)

@@ -1,9 +1,6 @@
 from unittest import TestCase
 
-from cassowary.variable import Variable
-from cassowary.constraint import StayConstraint, Equation
-from cassowary.simplex_solver import SimplexSolver
-from cassowary.strength import STRONG, REQUIRED
+from cassowary import Variable, Constraint, SimplexSolver, STRONG, REQUIRED
 
 
 class SimplexSolverTestCase(TestCase):
@@ -23,7 +20,7 @@ class SimplexSolverTestCase(TestCase):
 
         a = Variable(name='a')
 
-        solver.add_constraint(StayConstraint(a, STRONG, 0))
+        solver.add_stay(a, STRONG, 0)
         solver.resolve()
 
         self.assertEqual(a.value, 0)
@@ -41,8 +38,8 @@ class SimplexSolverTestCase(TestCase):
         a = Variable(name='a')
         b = Variable(name='b')
 
-        solver.add_constraint(StayConstraint(a, STRONG, 0))
-        solver.add_constraint(Equation(a, b, REQUIRED))
+        solver.add_stay(a, STRONG, 0)
+        solver.add_constraint(Constraint(a, Constraint.EQ, b, REQUIRED))
         solver.resolve()
 
         self.assertEqual(b.value, 0)

@@ -1,5 +1,6 @@
 from unittest import TestCase
 
+# Internals
 from cassowary.tableau import Tableau
 
 
