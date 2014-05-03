@@ -84,6 +84,45 @@ class Variable(AbstractVariable):
     def __repr__(self):
         return '%s[%s]' % (self.name, self.value)
 
+    def __eq__(self, other):
+        # Imports needed here to avoid circular dependencies
+        from .constraint import Constraint
+        from .expression import Expression
+        if isinstance(other, (Expression, Variable, float, int)):
+            return Constraint(self, Constraint.EQ, other)
+        else:
+            raise TypeError('Cannot compare variable with object of type %s' % type(other))
+
+    def __lt__(self, other):
+        # < and <= are equivalent in the API; it's effectively true
+        # due to float arithmetic, and it makes the API a little less hostile,
+        # because all the comparison operators exist.
+        return self.__le__(other)
+
+    def __le__(self, other):
+        # Imports needed here to avoid circular dependencies
+        from .constraint import Constraint
+        from .expression import Expression
+        if isinstance(other, (Expression, Variable, float, int)):
+            return Constraint(self, Constraint.LEQ, other)
+        else:
+            raise TypeError('Cannot compare variable with object of type %s' % type(other))
+
+    def __gt__(self, other):
+        # > and >= are equivalent in the API; it's effectively true
+        # due to float arithmetic, and it makes the API a little less hostile,
+        # because all the comparison operators exist.
+        return self.__ge__(other)
+
+    def __ge__(self, other):
+        # Imports needed here to avoid circular dependencies
+        from .constraint import Constraint
+        from .expression import Expression
+        if isinstance(other, (Expression, Variable, float, int)):
+            return Constraint(self, Constraint.GEQ, other)
+        else:
+            raise TypeError('Cannot compare variable with object of type %s' % type(other))
+
 
 class DummyVariable(AbstractVariable):
     def __init__(self, number):

@@ -576,34 +576,34 @@ class EndToEndTestCase(TestCase):
 
         for start, end in [(0, 1), (1, 2), (2, 3), (3, 0)]:
             cle = (points[start].x + points[end].x) / 2
-            cleq = Constraint(midpoints[start].x, Constraint.EQ, cle)
+            cleq = midpoints[start].x == cle
             solver.add_constraint(cleq)
             cle = (points[start].y + points[end].y) / 2
-            cleq = Constraint(midpoints[start].y, Constraint.EQ, cle)
+            cleq = midpoints[start].y == cle
             solver.add_constraint(cleq)
 
         cle = points[0].x + 20
-        solver.add_constraint(Constraint(cle, Constraint.LEQ, points[2].x))
-        solver.add_constraint(Constraint(cle, Constraint.LEQ, points[3].x))
+        solver.add_constraint(cle <= points[2].x)
+        solver.add_constraint(cle <= points[3].x)
 
         cle = points[1].x + 20
-        solver.add_constraint(Constraint(cle, Constraint.LEQ, points[2].x))
-        solver.add_constraint(Constraint(cle, Constraint.LEQ, points[3].x))
+        solver.add_constraint(cle <= points[2].x)
+        solver.add_constraint(cle <= points[3].x)
 
         cle = points[0].y + 20
-        solver.add_constraint(Constraint(cle, Constraint.LEQ, points[1].y))
-        solver.add_constraint(Constraint(cle, Constraint.LEQ, points[2].y))
+        solver.add_constraint(cle <= points[1].y)
+        solver.add_constraint(cle <= points[2].y)
 
         cle = points[3].y + 20
-        solver.add_constraint(Constraint(cle, Constraint.LEQ, points[1].y))
-        solver.add_constraint(Constraint(cle, Constraint.LEQ, points[2].y))
+        solver.add_constraint(cle <= points[1].y)
+        solver.add_constraint(cle <= points[2].y)
 
         for point in points:
-            solver.add_constraint(Constraint(point.x, Constraint.GEQ, 0))
-            solver.add_constraint(Constraint(point.y, Constraint.GEQ, 0))
+            solver.add_constraint(point.x >= 0)
+            solver.add_constraint(point.y >= 0)
 
-            solver.add_constraint(Constraint(point.x, Constraint.LEQ, 500))
-            solver.add_constraint(Constraint(point.y, Constraint.LEQ, 500))
+            solver.add_constraint(point.x <= 500)
+            solver.add_constraint(point.y <= 500)
 
         # Check the initial answers
 
@@ -661,78 +661,28 @@ class EndToEndTestCase(TestCase):
         stay = solver.add_stay(right_limit, WEAK)
 
         # The two buttons are the same width
-        solver.add_constraint(
-            Constraint(
-                b1.width,
-                Constraint.EQ,
-                b2.width,
-            )
-        )
+        solver.add_constraint(b1.width == b2.width)
 
         # b1 starts 50 from the left margin.
-        solver.add_constraint(
-            Constraint(
-                b1.left,
-                Constraint.EQ,
-                left_limit + 50
-            )
-        )
+        solver.add_constraint(b1.left == left_limit + 50)
 
         # b2 ends 50 from the right margin
-        solver.add_constraint(
-            Constraint(
-                left_limit + right_limit,
-                Constraint.EQ,
-                b2.left + b2.width + 50,
-            ),
-        )
+        solver.add_constraint(left_limit + right_limit == b2.left + b2.width + 50)
 
         # b2 starts at least 100 from the end of b1
-        solver.add_constraint(
-            Constraint(
-                b2.left,
-                Constraint.GEQ,
-                b1.left + b1.width + 100,
-            )
-        )
+        solver.add_constraint(b2.left >= (b1.left + b1.width + 100))
 
         # b1 has a minimum width of 87
-        solver.add_constraint(
-            Constraint(
-                b1.width,
-                Constraint.GEQ,
-                87,
-            )
-        )
+        solver.add_constraint(b1.width >= 87)
 
         # b1's preferred width is 87
-        solver.add_constraint(
-            Constraint(
-                b1.width,
-                Constraint.EQ,
-                87,
-                strength=STRONG
-            )
-        )
+        solver.add_constraint(b1.width == 87, STRONG)
 
         # b2's minimum width is 113
-        solver.add_constraint(
-            Constraint(
-                b2.width,
-                Constraint.GEQ,
-                113,
-            )
-        )
+        solver.add_constraint(b2.width >= 113)
 
         # b2's preferred width is 113
-        solver.add_constraint(
-            Constraint(
-                b2.width,
-                Constraint.EQ,
-                113,
-                strength=STRONG
-            )
-        )
+        solver.add_constraint(b2.width == 113, STRONG)
 
         # Without imposign a stay on the right, right_limit will be the minimum width for the layout
         self.assertAlmostEqual(b1.left.value, 50.0)

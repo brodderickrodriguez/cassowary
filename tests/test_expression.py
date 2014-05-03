@@ -277,11 +277,3 @@ class ExpressionTestCase(TestCase):
         self.assertEqual(e.constant, -2.5)
         self.assertIsNone(e.terms.get(va))
         self.assertEqual(e.terms.get(vb), 0.5)
-
-    def test_equals(self):
-        v = Variable('v', 5)
-
-        self.assertEqual(Expression(constant=10), Expression(constant=10))
-        self.assertNotEqual(Expression(constant=10), Expression(constant=1))
-        self.assertEqual(Expression(v, 2, -1), Expression(v, 2, -1))
-        self.assertNotEqual(Expression(v, -2, 5), Expression(v, 3, 6))

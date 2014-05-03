@@ -37,9 +37,56 @@ class SimplexSolver(Tableau):
         parts.append('edit_var_map: %s' % self.edit_var_map)
         return super(SimplexSolver, self).__repr__() + '\n' + '\n'.join(parts)
 
-    def add_constraints(self, *constraints):
-        for constraint in constraints:
-            self.add_constraint(constraint)
+
+    def add_constraint(self, cn, strength=None, weight=None):
+        if strength or weight:
+            cn = cn.clone()
+            if strength:
+                cn.strength = strength
+            if weight:
+                cn.weight = weight
+
+        # print 'add_constraint', cn
+        expr, eplus, eminus, prev_edit_constant = self.new_expression(cn)
+
+        if not self.try_adding_directly(expr):
+            self.add_with_artificial_variable(expr)
+
+        self.needs_solving = True
+
+        if cn.is_edit_constraint:
+            i = len(self.edit_var_map)
+
+            self.edit_var_map[cn.variable] = EditInfo(cn, eplus, eminus, prev_edit_constant, i)
+
+        if self.auto_solve:
+            self.optimize(self.objective)
+            self.set_external_variables()
+
+        return cn
+
+    def add_edit_var(self, v, strength=STRONG):
+        # print "add_edit_var", v, strength
+        return self.add_constraint(EditConstraint(v, strength))
+
+    def remove_edit_var(self, v):
+        self.remove_constraint(self.edit_var_map[v].constraint)
+
+    def begin_edit(self):
+        assert len(self.edit_var_map) > 0
+        self.infeasible_rows.clear()
+        self.reset_stay_constants()
+        self.edit_variable_stack.append(len(self.edit_var_map))
+
+    def end_edit(self):
+        assert len(self.edit_var_map) > 0
+        self.resolve()
+        self.edit_variable_stack.pop()
+        self.remove_edit_vars_to(self.edit_variable_stack[-1])
+
+    #######################################################################
+    # Internals
+    #######################################################################
 
     def new_expression(self, cn):
         # print "* new_expression", cn
@@ -114,52 +161,6 @@ class SimplexSolver(Tableau):
         if expr.constant < 0:
             expr.multiply(-1.0)
         return expr, eplus, eminus, prev_edit_constant
-
-    def add_constraint(self, cn):
-        # print 'add_constraint', cn
-        expr, eplus, eminus, prev_edit_constant = self.new_expression(cn)
-
-        if not self.try_adding_directly(expr):
-            self.add_with_artificial_variable(expr)
-
-        self.needs_solving = True
-
-        if cn.is_edit_constraint:
-            i = len(self.edit_var_map)
-
-            self.edit_var_map[cn.variable] = EditInfo(cn, eplus, eminus, prev_edit_constant, i)
-
-        if self.auto_solve:
-            self.optimize(self.objective)
-            self.set_external_variables()
-
-        return cn
-
-    def add_constraint_no_exception(self, cn):
-        try:
-            self.add_constraint(cn)
-            return True
-        except RequiredFailure:
-            return False
-
-    def add_edit_var(self, v, strength=STRONG):
-        # print "add_edit_var", v, strength
-        return self.add_constraint(EditConstraint(v, strength))
-
-    def remove_edit_var(self, v):
-        self.remove_constraint(self.edit_var_map[v].constraint)
-
-    def begin_edit(self):
-        assert len(self.edit_var_map) > 0
-        self.infeasible_rows.clear()
-        self.reset_stay_constants()
-        self.edit_variable_stack.append(len(self.edit_var_map))
-
-    def end_edit(self):
-        assert len(self.edit_var_map) > 0
-        self.resolve()
-        self.edit_variable_stack.pop()
-        self.remove_edit_vars_to(self.edit_variable_stack[-1])
 
     def remove_all_edit_vars(self):
         self.remove_edit_vars_to(0)

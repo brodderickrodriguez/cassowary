@@ -35,20 +35,9 @@ class Expression(object):
             expr.set_variable(clv, value)
         return expr
 
-    def __eq__(self, x):
-        if not isinstance(x, Expression):
-            return False
-
-        if not approx_equal(self.constant, x.constant):
-            return False
-
-        if len(self.terms) != len(x.terms):
-            return False
-
-        if any(x.terms.get(var) != value for var, value in self.terms.items()):
-            return False
-
-        return True
+    ######################################################################
+    # Mathematical operators
+    ######################################################################
 
     def __rmul__(self, x):
         return self.__mul__(x)
@@ -141,6 +130,50 @@ class Expression(object):
             return result
         else:
             raise TypeError('Cannot subtract object of type %s from expression' % type(x))
+
+    ######################################################################
+    # Mathematical operators
+    ######################################################################
+
+    def __eq__(self, other):
+        # Import needed here to avoid circular dependencies
+        from .constraint import Constraint
+        if isinstance(other, (Expression, Variable, float, int)):
+            return Constraint(self, Constraint.EQ, other)
+        else:
+            raise TypeError('Cannot compare expression with object of type %s' % type(other))
+
+    def __lt__(self, other):
+        # < and <= are equivalent in the API; it's effectively true
+        # due to float arithmetic, and it makes the API a little less hostile,
+        # because all the comparison operators exist.
+        return self.__le__(other)
+
+    def __le__(self, other):
+        # Import needed here to avoid circular dependencies
+        from .constraint import Constraint
+        if isinstance(other, (Expression, Variable, float, int)):
+            return Constraint(self, Constraint.LEQ, other)
+        else:
+            raise TypeError('Cannot compare expression with object of type %s' % type(other))
+
+    def __gt__(self, other):
+        # > and >= are equivalent in the API; it's effectively true
+        # due to float arithmetic, and it makes the API a little less hostile,
+        # because all the comparison operators exist.
+        return self.__ge__(other)
+
+    def __ge__(self, other):
+        # Import needed here to avoid circular dependencies
+        from .constraint import Constraint
+        if isinstance(other, (Expression, Variable, float, int)):
+            return Constraint(self, Constraint.GEQ, other)
+        else:
+            raise TypeError('Cannot compare expression with object of type %s' % type(other))
+
+    ######################################################################
+    # Internal mechanisms
+    ######################################################################
 
     def add_expression(self, expr, n=1.0, subject=None, solver=None):
         if isinstance(expr, AbstractVariable):

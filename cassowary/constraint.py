@@ -19,7 +19,6 @@ class AbstractConstraint(object):
     def __repr__(self):
         return u'%s:{%s}(%s)' % (repr_strength(self.strength), self.weight, self.expression)
 
-
 class EditConstraint(AbstractConstraint):
     def __init__(self, variable, strength=STRONG, weight=1.0):
         super(EditConstraint, self).__init__(strength, weight)
@@ -183,3 +182,8 @@ class Constraint(AbstractConstraint):
             raise InternalError("Invalid parameters to Constraint constructor")
 
         self.is_inequality = operator != self.EQ
+
+    def clone(self):
+        c = Constraint(self.expression, strength=self.strength, weight=self.weight)
+        c.is_inequality = self.is_inequality
+        return c

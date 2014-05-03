@@ -67,8 +67,8 @@ so on::
     weight = 1.0
     multiplier = 2.0
     for point in points[:4]:
-        solver.add_stay(point.x, WEAK, weight)
-        solver.add_stay(point.y, WEAK, weight)
+        solver.add_stay(point.x, strength=WEAK, weight=weight)
+        solver.add_stay(point.y, strength=WEAK, weight=weight)
         weight = weight * multiplier
 
 Now we can set up the constraints to define where the midpoints fall. By
@@ -81,11 +81,11 @@ system::
 
     for start, end in [(0, 1), (1, 2), (2, 3), (3, 0)]:
         cle = (points[start].x + points[end].x) / 2
-        cleq = Constraint(midpoints[start].x, Constraint.EQ, cle)
+        cleq = midpoints[start].x == cle
         solver.add_constraint(cleq)
 
         cle = (points[start].y + points[end].y) / 2
-        cleq = Constraint(midpoints[start].y, Constraint.EQ, cle)
+        cleq = midpoints[start].y == cle
         solver.add_constraint(cleq)
 
 When we added these constraints, we didn't provided any arguments - that means
@@ -95,20 +95,20 @@ Next, lets add some constraints to ensure that the left side of the quadrilatera
 stays on the left, and the top stays on top::
 
     cle = points[0].x + 20
-    solver.add_constraint(Constraint(cle, Constraint.LEQ, points[2].x))
-    solver.add_constraint(Constraint(cle, Constraint.LEQ, points[3].x))
+    solver.add_constraint(cle <= points[2].x)
+    solver.add_constraint(cle <= points[3].x)
 
     cle = points[1].x + 20
-    solver.add_constraint(Constraint(cle, Constraint.LEQ, points[2].x))
-    solver.add_constraint(Constraint(cle, Constraint.LEQ, points[3].x))
+    solver.add_constraint(cle <= points[2].x)
+    solver.add_constraint(cle <= points[3].x)
 
     cle = points[0].y + 20
-    solver.add_constraint(Constraint(cle, Constraint.LEQ, points[1].y))
-    solver.add_constraint(Constraint(cle, Constraint.LEQ, points[2].y))
+    solver.add_constraint(cle <= points[1].y)
+    solver.add_constraint(cle <= points[2].y)
 
     cle = points[3].y + 20
-    solver.add_constraint(Constraint(cle, Constraint.LEQ, points[1].y))
-    solver.add_constraint(Constraint(cle, Constraint.LEQ, points[2].y))
+    solver.add_constraint(cle <= points[1].y)
+    solver.add_constraint(cle <= points[2].y)
 
 Each of these constraints is posed as an :class:`Constraint`. For example, the first
 expression describes a point 20 pixels to the right of the x coordinate of the top
@@ -121,11 +121,11 @@ Lastly, we set the overall constraints -- the constraints that limit how large o
 2D canvas is. We'll constraint the canvas to be 500x500 pixels::
 
     for point in points:
-        solver.add_constraint(Constraint(point.x, Constraint.GEQ, 0))
-        solver.add_constraint(Constraint(point.y, Constraint.GEQ, 0))
+        solver.add_constraint(point.x >= 0)
+        solver.add_constraint(point.y >= 0)
 
-        solver.add_constraint(Constraint(point.x, Constraint.LEQ, 500))
-        solver.add_constraint(Constraint(point.y, Constraint.LEQ, 500))
+        solver.add_constraint(point.x <= 500)
+        solver.add_constraint(point.y <= 500)
 
 This gives us a fully formed constraint system. Now we can use it to answer
 layout questions. The most obvious initial question -- where are the midpoints?
@@ -221,30 +221,30 @@ the widgets it contains, so the right limit is a ``WEAK`` constraint.
 Now we can define the constraints on the button layouts::
 
     # The two buttons are the same width
-    solver.add_constraint(Constraint(b1.width, Constraint.EQ, b2.width))
+    solver.add_constraint(b1.width == b2.width)
 
     # Button1 starts 50 from the left margin.
-    solver.add_constraint(Constraint(b1.left, Constraint.EQ, left_limit + 50))
+    solver.add_constraint(b1.left == left_limit + 50)
 
     # Button2 ends 50 from the right margin
-    solver.add_constraint(Constraint(left_limit + right_limit, Constraint.EQ, b2.left + b2.width + 50))
+    solver.add_constraint(left_limit + right_limit == b2.left + b2.width + 50)
 
     # Button2 starts at least 100 from the end of Button1. This is the
     # "elastic" constraint in the system that will absorb extra space
     # in the layout.
-    solver.add_constraint(Constraint(b2.left, Constraint.GEQ, b1.left + b1.width + 100))
+    solver.add_constraint(b2.left == b1.left + b1.width + 100)
 
     # Button1 has a minimum width of 87
-    solver.add_constraint(Constraint(b1.width, Constraint.GEQ, 87))
+    solver.add_constraint(b1.width >= 87)
 
     # Button1's preferred width is 87
-    solver.add_constraint(Constraint(b1.width, Constraint.EQ, 87, strength=STRONG))
+    solver.add_constraint(b1.width == 87, strength=STRONG)
 
     # Button2's minimum width is 113
-    solver.add_constraint(Constraint(b2.width, Constraint.GEQ, 113))
+    solver.add_constraint(b2.width >= 113)
 
     # Button2's preferred width is 113
-    solver.add_constraint(Constraint(b2.width, Constraint.EQ, 113, strength=STRONG))
+    solver.add_constraint(b2.width == 113, strength=STRONG)
 
 Since we haven't imposed a hard constraint on the right hand side, the constraint
 system will give us the smallest window that will satisfy these constraints::
