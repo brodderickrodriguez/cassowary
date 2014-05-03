@@ -2,6 +2,9 @@ from __future__ import print_function, unicode_literals, absolute_import, divisi
 
 import random
 from unittest import TestCase
+if not hasattr(TestCase, 'assertIsNotNone'):
+    # For Python2.6 compatibility
+    from unittest2 import TestCase
 
 from cassowary import RequiredFailure, SimplexSolver, STRONG, WEAK, MEDIUM, REQUIRED, Variable
 
