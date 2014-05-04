@@ -10,11 +10,16 @@ layout mechanism.
 Quickstart
 ----------
 
-In your virtualenv, install Cassowary::
+Cassowary is compatible with both Python 2 or Python 3. To install Cassowary
+in your virtualenv, run::
 
     $ pip install cassowary
 
-Then, in a Python shell, you can create and solve constraint systems.
+Then, in your Python code, you can create and solve constraint systems. See
+`the documentation`_ for examples of what this looks like in
+practice.
+
+.. _the documentation: http://cassowary.readthedocs.org/en/latest/topics/examples.html
 
 Documentation
 -------------

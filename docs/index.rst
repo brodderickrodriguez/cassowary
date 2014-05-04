@@ -16,7 +16,7 @@ in your virtualenv, run::
     $ pip install cassowary
 
 Then, in your Python code, you can create and solve constraint systems. See
-:doc:`the examples <topics/examples>` for examples of what this looks like in
+:doc:`the documentation <topics/examples>` for examples of what this looks like in
 practice.
 
 Documentation
