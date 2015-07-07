@@ -14,13 +14,13 @@ form:
 
     ``a[1]x[1] + ... + a[n]x[n] >= b``,
 
-Given these contraints, the problem is to find the values of ``x[i]`` that
-minimizes or maximizes the value of an **objective function**:
+Given these constraints, the problem is to find the values of ``x[i]`` that
+minimize or maximize the value of an **objective function**:
 
     ``c + d[1]x[1] + ... + d[n]x[n]``
 
 Cassowary is an algorithm designed to solve linear programming problems of
-this type. Published in 1997, it now forms the basis fo the UI layout  tools
+this type. Published in 1997, it now forms the basis for the UI layout  tools
 in OS X Lion, and iOS 6+ (the approach known as `Auto Layout`_). The Cassowary
 algorithm (and this implementation of it) provides the tools to describe a set
 of constraints, and then find an optimal solution for that set of constraints.
@@ -72,7 +72,7 @@ raw mathematical expression::
     # Define the constraint
     constraint = x1 + 3 * x2 <= 4 * x3 + 2
 
-In this example, `constraint` holds the defintion for the constraint system.
+In this example, `constraint` holds the definition for the constraint system.
 Although the statement uses the Python comparison operator `<=`, the result is
 *not* a boolean. The comparison operators `<=`, `<`, `>=`, `>`, and `==` have
 been overridden for instances of :class:`~cassowary.Variable` to enable you to
@@ -158,7 +158,7 @@ Not all constraints are equal. Some are absolute requirements - for example, a
 requirement that all values remain in a specific range. However, other
 constraints may be suggestions, rather than hard requirements.
 
-To accomodate this, Cassowary allows all constraints to have a **strength**.
+To accommodate this, Cassowary allows all constraints to have a **strength**.
 Strength can be one of:
 
 * ``REQUIRED``
