@@ -12,7 +12,7 @@ to contribute code, please `fork the code`_ and `submit a pull request`_.
 Setting up your development environment
 ---------------------------------------
 
-The recommended way of setting up your development envrionment for Cassowary
+The recommended way of setting up your development environment for Cassowary
 is to install a virtual environment, install the required dependencies and
 start coding. Assuming that you are using ``virtualenvwrapper``, you only have
 to run::

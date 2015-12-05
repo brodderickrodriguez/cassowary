@@ -9,12 +9,12 @@ Quadrilaterals
 
 The "Bounded Quadrilateral" demo is the `online example`_ provided for
 Cassowary.  The online example is implemented in JavaScript, but the
-implementation doesn't alter the way the Cassowary algoritm is used.
+implementation doesn't alter the way the Cassowary algorithm is used.
 
 .. _online example: http://www.badros.com/greg/cassowary/js/quaddemo.html
 
 The Bounded quadrilateral problem starts with a bounded, two dimensional
-canvas. We want to draw a quadilateral on this plane, subject to a number of
+canvas. We want to draw a quadrilateral on this plane, subject to a number of
 constraints.
 
 Firstly, we set up the solver system itself::
@@ -88,7 +88,7 @@ added to the solver system::
         cleq = midpoints[start].y == cle
         solver.add_constraint(cleq)
 
-When we added these constraints, we didn't provided any arguments - that means
+When we added these constraints, we didn't provide any arguments - that means
 that they will be added as ``REQUIRED`` constraints.
 
 Next, lets add some constraints to ensure that the left side of the quadrilateral
@@ -106,7 +106,7 @@ stays on the left, and the top stays on top::
     solver.add_constraint(points[3].y + 20 <= points[1].y)
     solver.add_constraint(points[3].y + 20 <= points[2].y)
 
-Each of these constraints is posed as an :class:`~cassowary.Constraint`. For
+Each of these constraints is posed as a :class:`~cassowary.Constraint`. For
 example, the first expression describes a point 20 pixels to the right of the
 x coordinate of the top left point. This :class:`~cassowary.Constraint` is
 then added as a constraint on the x coordinate of the bottom right (point 2)
@@ -172,7 +172,7 @@ including the midpoints.
 GUI layout
 ----------
 
-The most common usage (by deployment count) of the Cassowary algoritm is as
+The most common usage (by deployment count) of the Cassowary algorithm is as
 the Autolayout mechanism that underpins GUIs in OS X Lion and iOS6. Although
 there's lots of code required to make a full GUI toolkit work, the layout
 problem is a relatively simple case of solving constraints regarding the size
@@ -184,10 +184,10 @@ worry about the X coordinate; expanding the implementation to include the Y
 coordinate is a relatively simple exercise left for the reader.
 
 When laying out a GUI, widgets have a width; however, widgets can also change
-size. To accomodate this, a widget has two size constraints in each dimension:
-a minimum size, and a preferred size. The miniumum size is an ``REQUIRED``
+size. To accommodate this, a widget has two size constraints in each dimension:
+a minimum size, and a preferred size. The minimum size is a ``REQUIRED``
 constraint that must be met; the preferred size is a ``STRONG`` constraint
-that the solver should try to accomodate, but may break if necessary.
+that the solver should try to accommodate, but may break if necessary.
 
 The GUI also needs to be concerned about the size of the window that is being
 laid out. The size of the window can be handled in two ways:
@@ -196,7 +196,7 @@ laid out. The size of the window can be handled in two ways:
   show me how to lay out the widgets; or
 
 * a ``WEAK`` constraint -- i.e., come up with a value for the window size that
-  accomodates all the other widget constraints. This is the interpretation used
+  accommodates all the other widget constraints. This is the interpretation used
   to determine an initial window size.
 
 As with the Quadrilateral demo, we start by creating the solver, and creating
@@ -228,7 +228,7 @@ window on which the buttons will be placed::
 
 The left limit is set as a ``REQUIRED`` constraint -- the left border can't
 move from coordinate 0. However, the window can expand if necessary to
-accomodate the widgets it contains, so the right limit is a ``WEAK``
+accommodate the widgets it contains, so the right limit is a ``WEAK``
 constraint.
 
 Now we can define the constraints on the button layouts::
@@ -271,7 +271,7 @@ constraints::
     >>> right_limit.value
     426.0
 
-That is, the smallest window that can accomodate these constraints is 426
+That is, the smallest window that can accommodate these constraints is 426
 pixels wide. However, if the user makes the window larger, we can still lay
 out widgets. We impose a new ``REQUIRED`` constraint with the size of the
 window::
