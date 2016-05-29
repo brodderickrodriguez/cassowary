@@ -19,7 +19,7 @@ Then, in your Python code, you can create and solve constraint systems. See
 `the documentation`_ for examples of what this looks like in
 practice.
 
-.. _the documentation: http://cassowary.readthedocs.org/en/latest/topics/examples.html
+.. _the documentation: https://cassowary.readthedocs.io/en/latest/topics/examples.html
 
 Documentation
 -------------
@@ -44,7 +44,7 @@ If you experience problems with Cassowary, `log them on GitHub`_. If you
 want to contribute code, please `fork the code`_ and `submit a pull request`_.
 
 .. _BeeWare suite: http://pybee.org
-.. _Read The Docs: http://cassowary.readthedocs.org
+.. _Read The Docs: https://cassowary.readthedocs.io
 .. _@pybeeware on Twitter: https://twitter.com/pybeeware
 .. _BeeWare Users Mailing list: https://groups.google.com/forum/#!forum/beeware-users
 .. _BeeWare Developers Mailing list: https://groups.google.com/forum/#!forum/beeware-developers
