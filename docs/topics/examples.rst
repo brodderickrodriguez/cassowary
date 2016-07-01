@@ -19,7 +19,7 @@ constraints.
 
 Firstly, we set up the solver system itself::
 
-    from cassowary import SimplexSolver, Variable, Constraint
+    from cassowary import SimplexSolver, Variable
     solver = SimplexSolver()
 
 Then, we set up a convenience class for holding information about points
@@ -202,7 +202,7 @@ laid out. The size of the window can be handled in two ways:
 As with the Quadrilateral demo, we start by creating the solver, and creating
 a storage mechanism to hold details about buttons::
 
-    from cassowary import SimplexSolver, Variable, Constraint
+    from cassowary import SimplexSolver, Variable
 
     solver = SimplexSolver()
 
