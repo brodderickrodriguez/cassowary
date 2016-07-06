@@ -28,9 +28,9 @@ class AbstractVariable(object):
             if x.is_constant:
                 return Expression(self, value=x.constant)
             else:
-                raise TypeError('Cannot multiply variable by non-constant expression')
+                return NotImplemented
         else:
-            raise TypeError('Cannot multiply variable by object of type %s' % type(x))
+            return NotImplemented
 
     def __truediv__(self, x):
         return self.__div__(x)
@@ -44,9 +44,9 @@ class AbstractVariable(object):
             if x.is_constant:
                 return Expression(self, value=1.0/x.constant)
             else:
-                raise TypeError('Cannot add non-constant expression to variable')
+                return NotImplemented
         else:
-            raise TypeError('Cannot divide variable by object of type %s' % type(x))
+            return NotImplemented
 
     def __radd__(self, x):
         return self.__add__(x)
@@ -59,7 +59,7 @@ class AbstractVariable(object):
         elif isinstance(x, AbstractVariable):
             return Expression(self) + Expression(x)
         else:
-            raise TypeError('Cannot add object of type %s to expression' % type(x))
+            return NotImplemented
 
     def __rsub__(self, x):
         if isinstance(x, (int, float)):
@@ -69,7 +69,7 @@ class AbstractVariable(object):
         elif isinstance(x, AbstractVariable):
             return Expression(x) - Expression(self)
         else:
-            raise TypeError('Cannot subtract variable from object of type %s' % type(x))
+            return NotImplemented
 
     def __sub__(self, x):
         if isinstance(x, (int, float)):
@@ -79,7 +79,7 @@ class AbstractVariable(object):
         elif isinstance(x, AbstractVariable):
             return Expression(self) - Expression(x)
         else:
-            raise TypeError('Cannot subtract object of type %s from variable' % type(x))
+            return NotImplemented
 
 
 class Variable(AbstractVariable):
@@ -97,7 +97,7 @@ class Variable(AbstractVariable):
         if isinstance(other, (Expression, Variable, float, int)):
             return Constraint(self, Constraint.EQ, other)
         else:
-            raise TypeError('Cannot compare variable with object of type %s' % type(other))
+            return NotImplemented
 
     def __lt__(self, other):
         # < and <= are equivalent in the API; it's effectively true
@@ -109,7 +109,7 @@ class Variable(AbstractVariable):
         if isinstance(other, (Expression, Variable, float, int)):
             return Constraint(self, Constraint.LEQ, other)
         else:
-            raise TypeError('Cannot compare variable with object of type %s' % type(other))
+            return NotImplemented
 
     def __gt__(self, other):
         # > and >= are equivalent in the API; it's effectively true
@@ -121,7 +121,7 @@ class Variable(AbstractVariable):
         if isinstance(other, (Expression, Variable, float, int)):
             return Constraint(self, Constraint.GEQ, other)
         else:
-            raise TypeError('Cannot compare variable with object of type %s' % type(other))
+            return NotImplemented
 
 
 class DummyVariable(AbstractVariable):
@@ -204,18 +204,18 @@ class Expression(object):
             elif x.is_constant:
                 result = self * x.constant
             else:
-                raise TypeError('Cannot multiply expression by non-constant')
+                return NotImplemented
         elif isinstance(x, Variable):
             if self.is_constant:
                 result = Expression(x, self.constant)
             else:
-                raise TypeError('Cannot multiply a variable by a non-constant expression')
+                return NotImplemented
         elif isinstance(x, (float, int)):
             result = Expression(constant=self.constant * x)
             for clv, value in self.terms.items():
                 result.set_variable(clv, value * x)
         else:
-            raise TypeError('Cannot multiply expression by object of type %s' % type(x))
+            return NotImplemented
         return result
 
     def __truediv__(self, x):
@@ -232,7 +232,7 @@ class Expression(object):
             if x.is_constant:
                 result = self / x.constant
             else:
-                raise TypeError('Cannot divide expression by non-constant')
+                return NotImplemented
         return result
 
     def __radd__(self, x):
@@ -252,7 +252,7 @@ class Expression(object):
             result.add_expression(Expression(constant=x), 1.0)
             return result
         else:
-            raise TypeError('Cannot add object of type %s to expression' % type(x))
+            return NotImplemented
 
     def __rsub__(self, x):
         if isinstance(x, Expression):
@@ -271,7 +271,7 @@ class Expression(object):
             result.add_expression(Expression(constant=x), 1.0)
             return result
         else:
-            raise TypeError('Cannot subtract object of type %s from expression' % type(x))
+            return NotImplemented
 
     def __sub__(self, x):
         if isinstance(x, Expression):
@@ -287,7 +287,7 @@ class Expression(object):
             result.add_expression(Expression(constant=x), -1.0)
             return result
         else:
-            raise TypeError('Cannot subtract object of type %s from expression' % type(x))
+            return NotImplemented
 
     ######################################################################
     # Mathematical operators
@@ -299,7 +299,7 @@ class Expression(object):
         if isinstance(other, (Expression, Variable, float, int)):
             return Constraint(self, Constraint.EQ, other)
         else:
-            raise TypeError('Cannot compare expression with object of type %s' % type(other))
+            return NotImplemented
 
     def __lt__(self, other):
         # < and <= are equivalent in the API; it's effectively true
@@ -311,7 +311,7 @@ class Expression(object):
         if isinstance(other, (Expression, Variable, float, int)):
             return Constraint(self, Constraint.LEQ, other)
         else:
-            raise TypeError('Cannot compare expression with object of type %s' % type(other))
+            return NotImplemented
 
     def __gt__(self, other):
         # > and >= are equivalent in the API; it's effectively true
@@ -323,7 +323,7 @@ class Expression(object):
         if isinstance(other, (Expression, Variable, float, int)):
             return Constraint(self, Constraint.GEQ, other)
         else:
-            raise TypeError('Cannot compare expression with object of type %s' % type(other))
+            return NotImplemented
 
     ######################################################################
     # Internal mechanisms
