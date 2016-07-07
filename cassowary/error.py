@@ -5,13 +5,13 @@ class CassowaryException(Exception):
     pass
 
 
-class InternalError(BaseException):
+class InternalError(CassowaryException):
     pass
 
 
-class ConstraintNotFound(BaseException):
+class ConstraintNotFound(CassowaryException):
     pass
 
 
-class RequiredFailure(BaseException):
+class RequiredFailure(CassowaryException):
     pass
