@@ -1,13 +1,17 @@
 from __future__ import print_function, unicode_literals, absolute_import, division
 
 
-class InternalError(Exception):
+class CassowaryException(Exception):
     pass
 
 
-class ConstraintNotFound(Exception):
+class InternalError(CassowaryException):
     pass
 
 
-class RequiredFailure(Exception):
+class ConstraintNotFound(CassowaryException):
+    pass
+
+
+class RequiredFailure(CassowaryException):
     pass
