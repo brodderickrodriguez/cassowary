@@ -1,3 +1,8 @@
+This project is in the attic
+============================
+
+Due to a change in focus, I'm not actively maintaining this project any longer. I'll happily merge any patch that looks reasonable; or, if you're interested in taking over the project, `get in touch <mailto:russell@pybee.org>`__.
+
 Cassowary
 =========
 
