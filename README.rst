@@ -50,7 +50,7 @@ want to contribute code, please `fork the code`_ and `submit a pull request`_.
 
 Project Administration
 ----------------------
-| This project was transferred to Brodderick Rodriguez in February 2020. He will continue to oversee its development from here on out..
+| This project was transferred to Brodderick Rodriguez in February 2020 who will continue to oversee its development from here on out.
 | Russell Keith-Magee is the original author of this work. A big thanks to him for his work! Check out `Russell's GitHub`_.
 
 
