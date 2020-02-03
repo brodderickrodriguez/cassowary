@@ -4,9 +4,10 @@ Contributing to Cassowary
 If you experience problems with Cassowary, `log them on GitHub`_. If you want
 to contribute code, please `fork the code`_ and `submit a pull request`_.
 
-.. _log them on Github: https://github.com/pybee/cassowary/issues
-.. _fork the code: https://github.com/pybee/cassowary
-.. _submit a pull request: https://github.com/pybee/cassowary/pulls
+
+.. _log them on Github: https://github.com/brodderickrodriguez/cassowary/issues
+.. _fork the code: https://github.com/brodderickrodriguez/cassowary
+.. _submit a pull request: https://github.com/brodderickrodriguez/cassowary/pulls
 
 
 Setting up your development environment
@@ -17,7 +18,7 @@ is to install a virtual environment, install the required dependencies and
 start coding. Assuming that you are using ``virtualenvwrapper``, you only have
 to run::
 
-    $ git clone git@github.com:pybee/cassowary.git
+    $ git clone https://github.com/brodderickrodriguez/cassowary.git
     $ cd cassowary
     $ mkvirtualenv cassowary
 

@@ -13,4 +13,4 @@ from .utils import REQUIRED, STRONG, MEDIUM, WEAK
 # __version__ = '1.2.3'       # Final Release
 # __version__ = '1.2.3.post1' # Post Release 1
 
-__version__ = '0.5.1'
+__version__ = '0.5.2'

@@ -39,7 +39,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Cassowary'
-copyright = u'2013, Russell Keith-Magee'
+copyright = u'2013-2019, Russell Keith-Magee. 2020 Brodderick Rodriguez'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -96,7 +96,7 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'default'
+html_theme = 'sphinx_rtd_theme'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -189,7 +189,7 @@ latex_elements = {
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
   ('index', 'cassowary.tex', u'Cassowary Documentation',
-   u'Russell Keith-Magee', 'manual'),
+   [u'Russell Keith-Magee', u'Brodderick Rodriguez'], 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -219,7 +219,7 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'cassowary', u'Cassowary Documentation',
-     [u'Russell Keith-Magee'], 1)
+     [u'Russell Keith-Magee', u'Brodderick Rodriguez'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -233,7 +233,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
   ('index', 'cassowary', u'Cassowary Documentation',
-   u'Russell Keith-Magee', 'Cassowary', 'A pure Python implementation of the Cassowary constraint solving algorithm.',
+   [u'Russell Keith-Magee', u'Brodderick Rodriguez'], 'Cassowary', 'A pure Python implementation of the Cassowary constraint solving algorithm.',
    'Miscellaneous'),
 ]
 

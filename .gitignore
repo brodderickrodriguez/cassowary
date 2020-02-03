@@ -8,3 +8,6 @@ _build
 distribute-*
 .coverage
 .tox
+.idea
+.local_about.txt
+*.html
